@@ -1,0 +1,75 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { PenLine } from "lucide-react";
+import { db } from "@/lib/db";
+import { isValidEditToken } from "@/lib/tokens";
+import { buildSiteData } from "@/lib/site-data";
+import { TemplateView, getTemplateMeta } from "@/lib/templates/registry";
+
+export const dynamic = "force-dynamic";
+
+async function loadProject(token: string) {
+  if (!isValidEditToken(token)) return null;
+  return db.project.findUnique({
+    where: { editToken: token },
+    include: {
+      resumes: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          blocks: { orderBy: { position: "asc" } },
+          pages: { orderBy: { createdAt: "asc" } },
+        },
+      },
+    },
+  });
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const project = await loadProject(token);
+  const blocks = project?.resumes[0]?.blocks ?? [];
+  const data = buildSiteData(blocks);
+  const title = data.name ? `${data.name} · 个人主页` : project?.title;
+
+  return {
+    title: { absolute: title ?? "个人主页" },
+    description: data.headline || data.summary || undefined,
+    robots: { index: false, follow: false },
+  };
+}
+
+export default async function PreviewPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  const { token } = await params;
+  const project = await loadProject(token);
+  if (!project) notFound();
+
+  const resume = project.resumes[0];
+  const blocks = resume?.blocks ?? [];
+  const data = buildSiteData(blocks);
+
+  const theme = (resume?.pages[0]?.theme ?? {}) as { preset?: string };
+  const templateId = getTemplateMeta(theme.preset).id;
+
+  return (
+    <>
+      <TemplateView id={templateId} data={data} />
+
+      <Link
+        href={`/edit/${token}`}
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-1.5 rounded-full bg-[#111214]/90 px-3.5 py-2 text-[12.5px] text-white/85 ring-1 ring-white/10 backdrop-blur transition-colors hover:bg-[#111214] print:hidden"
+      >
+        <PenLine className="size-3.5" />
+        编辑
+      </Link>
+    </>
+  );
+}

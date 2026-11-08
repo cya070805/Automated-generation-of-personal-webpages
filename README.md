@@ -61,10 +61,13 @@ prisma/
   seed.ts                  开发用种子
 src/
   app/
-    page.tsx               首页
-    start/                 三步向导（写经历 → 追问 → 确认文案）
-    edit/[token]/          用编辑链接查看内容
-    settings/              模型接入设置页
+    layout.tsx             根布局（只有 html/body）
+    (app)/                 产品界面，带导航与页脚
+      page.tsx             首页
+      start/               三步向导（写经历 → 追问 → 确认文案）
+      edit/[token]/        看内容、挑版式
+      settings/            模型接入设置页
+    preview/[token]/       生成的主页，整页渲染，不套产品导航
     api/
       llm/                 同源转发 / 测试连接 / 是否预置 Key
       resume/analyze/      抽取结构化内容 + 缺口分析
@@ -73,12 +76,15 @@ src/
       resume/draft/        两版文案 + 溯源
       resume/upload/       PDF / DOCX / TXT → 文本
       blocks/[id]/         选版本 / 改内容
+      pages/[id]/          换模板（只写 pages.theme）
       projects/            匿名项目（创建 / 按编辑 token 读取）
       health/              数据库自检
   components/              UI 与页面组件
   lib/
     llm/                   预设、转发、错误映射、浏览器端客户端
     ai/                    提示词、JSON 校验、模板模式兜底
+    templates/             模板登记表 + Paper / Terminal
+    site-data.ts           内容块 → 模板数据
     db.ts                  Prisma 单例
     tokens.ts              编辑 token / 分享 slug
   store/                   Zustand（设置持久化到 localStorage）
@@ -98,6 +104,7 @@ docs/                      产品文档与生成脚本
 | POST | `/api/resume/answer` | 记录回答 |
 | POST | `/api/resume/draft` | 生成两版文案与溯源 |
 | PATCH | `/api/blocks/{id}` | 选版本 / 改内容 |
+| PATCH | `/api/pages/{id}` | 换模板（`{ preset }`），只动 `pages.theme` |
 | POST | `/api/projects` | 创建匿名项目，返回 `editToken` 与编辑链接 |
 | GET | `/api/projects/{token}` | 用编辑 token 读取项目（内容块 + 页面） |
 | GET | `/api/health` | 数据库连通性与十张表计数 |
@@ -125,7 +132,7 @@ Docker Compose 部署（未开始）。
 
 1. ~~骨架 + 数据模型 + 模型接入~~
 2. ~~内容闭环：解析 → 追问 → 文案确认~~
-3. 呈现闭环：五套模板 + 结构化编辑 + PDF 导出
+3. 呈现闭环：~~版式系统 + 两套模板~~（Paper / Terminal）+ 结构化编辑 + PDF 导出
 4. 自由画布 + 两种导出（平台发布 / 部署包）
 
 ## 不做

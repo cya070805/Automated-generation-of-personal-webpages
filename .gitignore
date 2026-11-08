@@ -52,3 +52,6 @@ next-env.d.ts
 
 # 本地截图
 .shots/
+
+# 参考截图（B 站视频画面，仅本地留存）
+docs/refs/*.png

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { isValidEditToken } from "@/lib/tokens";
+import { getTemplateMeta } from "@/lib/templates/registry";
+import { TemplatePicker } from "./template-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +49,7 @@ export default async function EditPage({
         orderBy: { createdAt: "asc" },
         include: {
           blocks: { orderBy: { position: "asc" } },
+          pages: { orderBy: { createdAt: "asc" } },
         },
       },
     },
@@ -56,16 +61,33 @@ export default async function EditPage({
   const blocks = resume?.blocks ?? [];
   const profile = blocks.find((block) => block.type === "profile");
   const profileContent = (profile?.content ?? {}) as BlockContent;
+  const page = resume?.pages[0];
+  const theme = (page?.theme ?? {}) as { preset?: string };
 
   return (
     <div className="fade-up max-w-[760px]">
-      <p className="text-[12.5px] text-faint">内容</p>
-      <h1 className="mt-2 text-[30px] leading-tight tracking-[-0.02em] text-ink">
-        {profileContent.name || project.title}
-      </h1>
-      {profileContent.headline && (
-        <p className="mt-1.5 text-[14px] text-muted">{profileContent.headline}</p>
-      )}
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <p className="text-[12.5px] text-faint">内容</p>
+          <h1 className="mt-2 text-[30px] leading-tight tracking-[-0.02em] text-ink">
+            {profileContent.name || project.title}
+          </h1>
+          {profileContent.headline && (
+            <p className="mt-1.5 text-[14px] text-muted">
+              {profileContent.headline}
+            </p>
+          )}
+        </div>
+        <Link
+          href={`/preview/${token}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-lg border border-line-strong px-3 py-1.5 text-[12.5px] text-ink-2 transition-colors hover:bg-subtle"
+        >
+          预览主页
+          <ArrowUpRight className="size-3.5" />
+        </Link>
+      </div>
 
       <div className="mt-10 space-y-8">
         {blocks
@@ -110,7 +132,17 @@ export default async function EditPage({
           })}
       </div>
 
-      <p className="mt-12 border-t border-line pt-5 text-[12px] text-faint">
+      {page && (
+        <div className="mt-10">
+          <TemplatePicker
+            token={token}
+            pageId={page.id}
+            current={getTemplateMeta(theme.preset).id}
+          />
+        </div>
+      )}
+
+      <p className="mt-10 border-t border-line pt-5 text-[12px] text-faint">
         把这条链接存好，下次从这里回来继续改。
       </p>
     </div>
