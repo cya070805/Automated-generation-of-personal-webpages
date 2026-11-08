@@ -3,24 +3,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-[14px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-45 [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        primary:
-          "bg-navy text-paper hover:bg-navy/90 shadow-[0_1px_0_rgba(255,255,255,0.12)_inset]",
-        teal: "bg-teal text-white hover:bg-teal/90",
-        outline:
-          "border border-line-strong bg-transparent text-ink hover:bg-paper-deep",
-        ghost: "text-ink-soft hover:bg-paper-deep",
-        link: "text-teal underline-offset-4 hover:underline rounded-none px-0",
+        primary: "bg-ink text-white hover:bg-ink/88",
+        secondary:
+          "border border-line-strong bg-bg text-ink hover:bg-subtle",
+        ghost: "text-ink-2 hover:bg-subtle",
+        link: "h-auto px-0 text-accent underline-offset-4 hover:underline",
         danger:
-          "border border-danger/30 bg-danger/5 text-danger hover:bg-danger/10",
+          "border border-danger/25 bg-bg text-danger hover:bg-danger-soft",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-5",
-        lg: "h-12 px-7 text-base",
+        sm: "h-8 px-3 text-[13px]",
+        md: "h-10 px-4",
+        lg: "h-11 px-5",
         icon: "size-9 p-0",
       },
     },

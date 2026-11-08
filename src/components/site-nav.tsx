@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/store/settings-store";
 import { useSettingsHydration } from "@/store/use-settings-hydration";
+import { useServerKey } from "@/lib/llm/use-server-key";
 
 const links = [
   { href: "/", label: "总览" },
@@ -12,34 +13,44 @@ const links = [
   { href: "/settings", label: "模型接入" },
 ];
 
+const providerNames: Record<string, string> = {
+  deepseek: "DeepSeek",
+  qwen: "通义千问",
+  zhipu: "智谱 GLM",
+  kimi: "Kimi",
+  openai: "OpenAI",
+  custom: "自定义",
+};
+
 export function SiteNav() {
   const pathname = usePathname();
   const { providerId, apiKey, mode, hydrated } = useSettings();
+  const serverKey = useServerKey();
   useSettingsHydration();
 
-  const label = !hydrated
+  const connected =
+    hydrated && mode === "llm" && (Boolean(apiKey) || serverKey);
+  const status = !hydrated
     ? "读取配置"
     : mode === "template"
       ? "模板模式"
-      : !apiKey
-        ? "未接 Key"
-        : providerLabel(providerId);
-
-  const live = hydrated && Boolean(apiKey) && mode === "llm";
+      : connected
+        ? providerNames[providerId] ?? providerId
+        : "未接 Key";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-paper/85 backdrop-blur-md">
-      <div className="container-page flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="group flex items-baseline gap-2.5">
-          <span className="font-display text-[19px] tracking-tight text-navy">
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur">
+      <div className="container-page flex h-14 items-center justify-between gap-6">
+        <Link href="/" className="flex items-baseline gap-2">
+          <span className="text-[16px] font-semibold tracking-tight text-ink">
             履道
           </span>
-          <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-faint sm:inline">
-            resume → homepage
+          <span className="hidden text-[11px] text-faint sm:inline">
+            AI 个人主页
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-6">
           {links.map((link) => {
             const active =
               link.href === "/"
@@ -50,10 +61,8 @@ export function SiteNav() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-full px-3.5 py-1.5 text-[13px] transition-colors",
-                  active
-                    ? "bg-paper-deep font-medium text-ink"
-                    : "text-muted hover:text-ink",
+                  "text-[13.5px] transition-colors",
+                  active ? "text-ink" : "text-muted hover:text-ink",
                 )}
               >
                 {link.label}
@@ -64,30 +73,18 @@ export function SiteNav() {
 
         <Link
           href="/settings"
-          className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[11px] text-muted transition-colors hover:border-line-strong hover:text-ink"
+          className="flex items-center gap-1.5 text-[12.5px] text-muted transition-colors hover:text-ink"
           title="模型接入状态"
         >
           <span
             className={cn(
               "size-1.5 rounded-full",
-              live ? "bg-teal" : "bg-faint",
+              connected ? "bg-success" : "bg-line-strong",
             )}
           />
-          <span className="font-mono uppercase tracking-[0.1em]">{label}</span>
+          {status}
         </Link>
       </div>
     </header>
   );
-}
-
-function providerLabel(id: string) {
-  const map: Record<string, string> = {
-    deepseek: "DeepSeek",
-    qwen: "通义千问",
-    zhipu: "智谱",
-    kimi: "Kimi",
-    openai: "OpenAI",
-    custom: "自定义",
-  };
-  return map[id] ?? id;
 }

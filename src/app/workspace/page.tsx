@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { CheckCircle2, Circle, Database, KeyRound } from "lucide-react";
 import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { CreateProject } from "@/components/workspace/create-project";
 
 export const dynamic = "force-dynamic";
@@ -13,30 +10,10 @@ export const metadata: Metadata = {
 };
 
 const phases = [
-  {
-    id: "一期",
-    name: "骨架 · 数据模型 · 模型接入",
-    state: "done" as const,
-    detail: ["Next.js 15 应用骨架", "十张表 + 迁移", "Key 设置页与 /api/llm 转发"],
-  },
-  {
-    id: "二期",
-    name: "内容闭环",
-    state: "todo" as const,
-    detail: ["简历解析与抽取", "缺口分析与追问", "文案确认（两版 + 溯源）"],
-  },
-  {
-    id: "三期",
-    name: "呈现闭环",
-    state: "todo" as const,
-    detail: ["五套模板与设计令牌", "结构化编辑", "PDF 导出"],
-  },
-  {
-    id: "四期",
-    name: "画布与导出",
-    state: "todo" as const,
-    detail: ["自由画布与拖拽", "平台托管的分享页", "静态包 / Docker 部署包"],
-  },
+  { id: "一期", name: "骨架 · 数据模型 · 模型接入", done: true },
+  { id: "二期", name: "内容闭环：解析 → 追问 → 文案", done: false },
+  { id: "三期", name: "呈现闭环：模板 · 编辑 · PDF", done: false },
+  { id: "四期", name: "画布 · 平台发布 · 部署包", done: false },
 ];
 
 const tables = [
@@ -95,136 +72,93 @@ export default async function WorkspacePage() {
   const counts = result.ok ? result.counts : null;
 
   return (
-    <div className="fade-up space-y-12">
-      <header className="max-w-2xl">
-        <p className="eyebrow">工作台 · 一期</p>
-        <h1 className="mt-3 font-display text-[34px] leading-tight text-navy">
-          地基打完了，先自检
-        </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-          {"这一期只有三件事：应用骨架、十张表、模型接入。下面的数字是真的从数据库里读出来的——不是写死的文案。"}
+    <div className="fade-up max-w-[880px]">
+      <header>
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-[30px] leading-tight tracking-[-0.02em] text-ink">
+            工作台
+          </h1>
+          {result.ok ? (
+            <Badge tone="success">数据库已连通</Badge>
+          ) : (
+            <Badge tone="danger">未连通</Badge>
+          )}
+        </div>
+        <p className="mt-3 max-w-[600px] text-[14.5px] leading-[1.75] text-muted">
+          {"这一期只有三件事：应用骨架、十张表、模型接入。下面这些数字是真的从数据库里读出来的。"}
         </p>
       </header>
 
-      {/* Roadmap */}
-      <section>
-        <div className="flex items-baseline justify-between">
-          <p className="eyebrow">实施顺序</p>
-          <p className="font-mono text-[10px] text-faint">4 phases</p>
-        </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-10">
+        <h2 className="text-[15px] font-medium text-ink">实施顺序</h2>
+        <ul className="mt-3">
           {phases.map((phase) => (
-            <div
+            <li
               key={phase.id}
-              className={`rounded-xl border p-5 ${
-                phase.state === "done"
-                  ? "border-teal/30 bg-teal-soft/50"
-                  : "border-line bg-surface"
-              }`}
+              className="flex items-center gap-3 border-t border-line py-2.5 last:border-b"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-faint">{phase.id}</span>
-                {phase.state === "done" ? (
-                  <CheckCircle2 className="size-4 text-teal" />
-                ) : (
-                  <Circle className="size-4 text-line-strong" />
-                )}
-              </div>
-              <p className="mt-3 font-display text-[16px] leading-snug text-ink">
-                {phase.name}
-              </p>
-              <ul className="mt-3 space-y-1.5">
-                {phase.detail.map((item) => (
-                  <li key={item} className="text-[12px] leading-relaxed text-muted">
-                    · {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <span
+                className={
+                  phase.done
+                    ? "size-1.5 rounded-full bg-success"
+                    : "size-1.5 rounded-full bg-line-strong"
+                }
+              />
+              <span className="w-10 text-[12.5px] text-faint">{phase.id}</span>
+              <span className="text-[13.5px] text-ink">{phase.name}</span>
+              {phase.done && <span className="ml-auto text-[12px] text-muted">已完成</span>}
+            </li>
           ))}
+        </ul>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[15px] font-medium text-ink">十张表</h2>
+          <span className="text-[12px] text-faint">GET /api/health</span>
+        </div>
+
+        {result.ok ? (
+          <div className="mt-3 overflow-hidden rounded-xl border border-line">
+            {tables.map(([name, desc], index) => {
+              const count = counts?.[name as keyof typeof counts] ?? 0;
+              return (
+                <div
+                  key={name}
+                  className={
+                    "grid grid-cols-[1fr_auto] items-baseline gap-4 px-4 py-2.5 " +
+                    (index !== 0 ? "border-t border-line" : "")
+                  }
+                >
+                  <div className="flex min-w-0 items-baseline gap-3">
+                    <span className="font-mono text-[12px] text-ink">{name}</span>
+                    <span className="truncate text-[12px] text-faint">{desc}</span>
+                  </div>
+                  <span className="text-[12px] tabular-nums text-muted">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-3 rounded-xl border border-danger/25 bg-danger-soft/60 px-4 py-4">
+            <p className="text-[13px] text-danger">数据库还没初始化：{result.message}</p>
+            <pre className="mt-2 rounded bg-bg px-2 py-1.5 font-mono text-[12px] text-ink">
+              npm run db:push
+            </pre>
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10 border-t border-line pt-8">
+        <h2 className="text-[15px] font-medium text-ink">建个项目试试</h2>
+        <div className="mt-3 max-w-[560px]">
+          <CreateProject />
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        {/* Tables */}
-        <section>
-          <div className="flex items-center gap-2">
-            <Database className="size-4 text-teal" />
-            <h2 className="text-[15px] font-medium text-ink">十张表</h2>
-            {result.ok ? (
-              <Badge tone="teal">已连通</Badge>
-            ) : (
-              <Badge tone="danger">未连通</Badge>
-            )}
-          </div>
-
-          {result.ok ? (
-            <div className="mt-4 overflow-hidden rounded-xl border border-line bg-surface">
-              {tables.map(([name, desc], index) => {
-                const count = counts?.[name as keyof typeof counts] ?? 0;
-                return (
-                  <div
-                    key={name}
-                    className={`grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-2.5 ${
-                      index !== 0 ? "border-t border-line" : ""
-                    }`}
-                  >
-                    <div className="flex min-w-0 items-baseline gap-3">
-                      <span className="font-mono text-[12px] text-ink">{name}</span>
-                      <span className="truncate text-[11.5px] text-faint">{desc}</span>
-                    </div>
-                    <span className="font-mono text-[12px] tabular-nums text-muted">
-                      {count}
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="flex justify-between border-t border-line bg-paper-deep/50 px-4 py-2.5">
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                  GET /api/health
-                </span>
-                <span className="font-mono text-[10px] text-teal">ok</span>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 rounded-xl border border-danger/25 bg-danger/5 p-5">
-              <p className="text-[13px] font-medium text-danger">数据库还没初始化</p>
-              <p className="mt-2 text-[12.5px] leading-relaxed text-ink-soft">
-                {result.message}
-              </p>
-              <pre className="mt-3 overflow-x-auto rounded-lg bg-navy px-3 py-2 font-mono text-[11px] text-paper">
-                npm run db:push
-              </pre>
-            </div>
-          )}
-        </section>
-
-        {/* Actions */}
-        <section className="space-y-5">
-          <div className="rounded-xl border border-line bg-surface p-5">
-            <h2 className="text-[15px] font-medium text-ink">建个项目试试</h2>
-            <div className="mt-3">
-              <CreateProject />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-line bg-surface p-5">
-            <div className="flex items-center gap-2">
-              <KeyRound className="size-4 text-warm" />
-              <h2 className="text-[15px] font-medium text-ink">模型接入</h2>
-            </div>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
-              {"这一期的另一半在设置页：五家预设、自定义地址、测试连接、同源转发。Key 不落库。"}
-            </p>
-            <Link
-              href="/settings"
-              className={buttonVariants({ variant: "outline", size: "sm" }) + " mt-4"}
-            >
-              去配置模型
-            </Link>
-          </div>
-        </section>
-      </div>
+      <p className="mt-8 text-[13px] text-muted">
+        {"下一步是二期：解析 → 追问 → 文案确认。"}
+      </p>
     </div>
   );
 }
