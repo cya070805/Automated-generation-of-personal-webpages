@@ -10,14 +10,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="container-page flex flex-col gap-3 py-6 text-[12.5px] text-muted sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="font-medium text-ink">履道</span>
-            <span className="text-faint">v0.1.0 · 一期</span>
+            <span className="text-faint">面试官看得懂的个人主页</span>
           </div>
           <div className="flex flex-wrap items-center gap-5">
-            <Link className="hover:text-ink" href="/workspace">
-              工作台
+            <Link className="hover:text-ink" href="/start">
+              开始制作
             </Link>
             <Link className="hover:text-ink" href="/settings">
-              模型接入
+              模型设置
             </Link>
             <a
               className="hover:text-ink"
@@ -27,7 +27,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               GitHub
             </a>
-            <span className="text-faint">不提供服务器 · 不代管域名</span>
           </div>
         </div>
       </footer>

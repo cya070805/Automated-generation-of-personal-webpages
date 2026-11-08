@@ -8,9 +8,9 @@ import { useSettingsHydration } from "@/store/use-settings-hydration";
 import { useServerKey } from "@/lib/llm/use-server-key";
 
 const links = [
-  { href: "/", label: "总览" },
-  { href: "/workspace", label: "工作台" },
-  { href: "/settings", label: "模型接入" },
+  { href: "/", label: "首页" },
+  { href: "/start", label: "开始制作" },
+  { href: "/settings", label: "模型设置" },
 ];
 
 const providerNames: Record<string, string> = {
@@ -28,8 +28,7 @@ export function SiteNav() {
   const serverKey = useServerKey();
   useSettingsHydration();
 
-  const connected =
-    hydrated && mode === "llm" && (Boolean(apiKey) || serverKey);
+  const connected = hydrated && mode === "llm" && (Boolean(apiKey) || serverKey);
   const status = !hydrated
     ? "读取配置"
     : mode === "template"
