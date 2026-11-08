@@ -1,0 +1,165 @@
+// 十张表：没有 users（身份就是 projects.edit_token），
+// 也没有 keys（API Key 只存在浏览器本地）。
+// 本地开发用 SQLite，换 Postgres 只改 datasource 与 provider 即可。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 匿名项目：一条编辑链接就是身份
+model Project {
+  id        String   @id @default(cuid())
+  title     String   @default("未命名主页")
+  editToken String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resumes Resume[]
+  assets  Asset[]
+
+  @@map("projects")
+}
+
+/// 一份简历的容器
+model Resume {
+  id         String   @id @default(cuid())
+  projectId  String
+  status     String   @default("draft") // draft | collecting | ready
+  targetRole String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  project  Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  blocks   ResumeBlock[]
+  sessions ChatSession[]
+  pages    Page[]
+
+  @@index([projectId])
+  @@map("resumes")
+}
+
+/// 内容块：带溯源（source_quote）与置信度
+model ResumeBlock {
+  id          String   @id @default(cuid())
+  resumeId    String
+  type        String // profile | education | experience | project | skill | work
+  content     Json
+  sourceQuote String?
+  confidence  Float?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, type])
+  @@map("resume_blocks")
+}
+
+/// 一次追问会话
+model ChatSession {
+  id        String   @id @default(cuid())
+  resumeId  String
+  stage     String   @default("gap") // gap | ask | confirm | done
+  gapList   Json?
+  createdAt DateTime @default(now())
+
+  resume   Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([resumeId])
+  @@map("chat_sessions")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  sessionId  String
+  role       String // user | assistant | system
+  content    String
+  askedField String?
+  createdAt  DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("messages")
+}
+
+/// 呈现层：与内容分离，换模板不动内容
+model Page {
+  id        String   @id @default(cuid())
+  resumeId  String
+  theme     Json?
+  layout    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resume   Resume        @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  versions PageVersion[]
+  share    Share?
+  exports  Export[]
+
+  @@index([resumeId])
+  @@map("pages")
+}
+
+model PageVersion {
+  id        String   @id @default(cuid())
+  pageId    String
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("page_versions")
+}
+
+/// 头像与作品图
+model Asset {
+  id        String   @id @default(cuid())
+  projectId String
+  kind      String // avatar | work | other
+  path      String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("assets")
+}
+
+/// 平台托管的分享页
+model Share {
+  id           String   @id @default(cuid())
+  pageId       String   @unique
+  slug         String   @unique
+  passwordHash String?
+  noindex      Boolean  @default(true)
+  publishedAt  DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("shares")
+}
+
+/// 静态包 / 动态包导出记录
+model Export {
+  id        String   @id @default(cuid())
+  pageId    String
+  mode      String // static | dynamic
+  version   String
+  path      String
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("exports")
+}
