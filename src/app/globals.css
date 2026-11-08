@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fbfaf6;
+  --color-paper-deep: #f3f0e8;
+  --color-surface: #ffffff;
+  --color-ink: #171a1f;
+  --color-ink-soft: #3a4048;
+  --color-muted: #6d747d;
+  --color-faint: #9aa0a6;
+  --color-line: #e3ded2;
+  --color-line-strong: #cdc6b6;
+  --color-navy: #16324f;
+  --color-teal: #2e6e6b;
+  --color-teal-soft: #e6efed;
+  --color-warm: #b06a3c;
+  --color-warm-soft: #f8ede2;
+  --color-danger: #b3402f;
+
+  --font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun",
+    Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono",
+    monospace;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-teal-soft);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+@utility container-page {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+@utility hairline {
+  border-top: 1px solid var(--color-line);
+}
+
+/* 细网格纸底，用在首页 hero 区域 */
+.paper-grid {
+  background-image:
+    linear-gradient(to right, rgba(22, 50, 79, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(22, 50, 79, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
