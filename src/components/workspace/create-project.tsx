@@ -84,8 +84,7 @@ export function CreateProject() {
   return (
     <div className="space-y-3">
       <p className="text-[13px] leading-relaxed text-muted">
-        走一遍真实链路：POST /api/projects 建项目 → 同时建出简历容器与页面骨架 →
-        返回一条带随机密钥的编辑链接。
+        {"走一遍真实链路：POST /api/projects 建项目 → 同时建出简历容器与页面骨架 → 返回一条带随机密钥的编辑链接。"}
       </p>
       <Button onClick={onCreate} disabled={loading}>
         {loading ? <Loader2 className="animate-spin" /> : <Plus />}

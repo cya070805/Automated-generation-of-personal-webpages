@@ -102,8 +102,7 @@ export default async function WorkspacePage() {
           地基打完了，先自检
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-          这一期只有三件事：应用骨架、十张表、模型接入。
-          下面的数字是真的从数据库里读出来的——不是写死的文案。
+          {"这一期只有三件事：应用骨架、十张表、模型接入。下面的数字是真的从数据库里读出来的——不是写死的文案。"}
         </p>
       </header>
 
@@ -215,8 +214,7 @@ export default async function WorkspacePage() {
               <h2 className="text-[15px] font-medium text-ink">模型接入</h2>
             </div>
             <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
-              这一期的另一半在设置页：五家预设、自定义地址、测试连接、
-              同源转发。Key 不落库。
+              {"这一期的另一半在设置页：五家预设、自定义地址、测试连接、同源转发。Key 不落库。"}
             </p>
             <Link
               href="/settings"

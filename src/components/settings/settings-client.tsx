@@ -78,9 +78,7 @@ export function SettingsClient() {
           把你自己那家模型接进来
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-          五家预设，或任何 OpenAI 兼容服务。Key 只存在这台浏览器的本地存储里，
-          调用经同源转发，服务端不落盘、不写日志。没填也能用——
-          自动走模板模式。
+          {"五家预设，或任何 OpenAI 兼容服务。Key 只存在这台浏览器的本地存储里，调用经同源转发，服务端不落盘、不写日志。没填也能用——自动走模板模式。"}
         </p>
       </header>
 
@@ -295,8 +293,7 @@ export function SettingsClient() {
                     模板模式
                   </p>
                   <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-muted">
-                    不调模型，用问卷 + 结构化填空走完流程，照样生成主页与 PDF。
-                    关闭后会优先用你配的模型做解析、追问与文案。
+                    {"不调模型，用问卷 + 结构化填空走完流程，照样生成主页与 PDF。关闭后会优先用你配的模型做解析、追问与文案。"}
                   </p>
                 </div>
                 <button

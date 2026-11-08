@@ -39,16 +39,14 @@ export default function HomePage() {
             </span>
           </div>
 
-          <h1 className="mt-7 font-display text-[38px] leading-[1.18] text-navy sm:text-[52px]">
+          <h1 className="mt-7 font-display text-[30px] leading-[1.2] text-navy sm:text-[52px] sm:leading-[1.18]">
             不用会建站，
             <br />
             一次对话把经历问清楚。
           </h1>
 
           <p className="mt-6 max-w-[52ch] text-[15px] leading-[1.85] text-ink-soft">
-            面向应届生与实习生的个人主页生成器。不用会排版，也不用先想清楚经历怎么写——
-            把旧简历丢进来，或者回答几个问题，剩下的交给它。
-            产物可以留在平台上拿一条链接，也可以打包带走自己部署。
+            {"面向应届生与实习生的个人主页生成器。不用会排版，也不用先想清楚经历怎么写——把旧简历丢进来，或者回答几个问题，剩下的交给它。产物可以留在平台上拿一条链接，也可以打包带走自己部署。"}
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -109,8 +107,7 @@ export default function HomePage() {
             </h2>
           </div>
           <p className="max-w-[34ch] text-[12.5px] leading-relaxed text-muted">
-            一期只把地基打完：骨架、十张表、模型接入。
-            往上的内容与呈现能力按四期推进。
+            {"一期只把地基打完：骨架、十张表、模型接入。往上的内容与呈现能力按四期推进。"}
           </p>
         </div>
 
@@ -155,8 +152,7 @@ export default function HomePage() {
           <p className="eyebrow">A · 平台托管</p>
           <h3 className="mt-3 font-display text-[22px] text-navy">一条链接</h3>
           <p className="mt-3 text-[13.5px] leading-[1.8] text-ink-soft">
-            发布到平台子域名，回编辑器改，即时生效。
-            适合投简历、发给 HR 或内推人。可选访问密码与不收录索引。
+            {"发布到平台子域名，回编辑器改，即时生效。适合投简历、发给 HR 或内推人。可选访问密码与不收录索引。"}
           </p>
         </div>
         <div className="rounded-[16px] border border-ink/10 bg-navy p-7 text-paper">
@@ -165,8 +161,7 @@ export default function HomePage() {
           </p>
           <h3 className="mt-3 font-display text-[22px]">一个站点包</h3>
           <p className="mt-3 text-[13.5px] leading-[1.8] text-paper/75">
-            静态包丢到任意托管，或 Docker 一条命令起动态站。
-            服务器、域名、证书一律自理——平台只交付可部署的产物。
+            {"静态包丢到任意托管，或 Docker 一条命令起动态站。服务器、域名、证书一律自理——平台只交付可部署的产物。"}
           </p>
           <p className="mt-5 font-mono text-[11px] text-teal-soft/80">
             site/ · server.js · content/ · Dockerfile · README.md
