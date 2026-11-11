@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { isValidEditToken } from "@/lib/tokens";
-import { getTemplateMeta } from "@/lib/templates/registry";
-import { TemplatePicker } from "./template-picker";
+import { getBase } from "@/lib/templates/bases";
+import { BasePicker } from "./base-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +62,6 @@ export default async function EditPage({
   const profile = blocks.find((block) => block.type === "profile");
   const profileContent = (profile?.content ?? {}) as BlockContent;
   const page = resume?.pages[0];
-  const theme = (page?.theme ?? {}) as { preset?: string };
 
   return (
     <div className="fade-up max-w-[760px]">
@@ -134,10 +133,10 @@ export default async function EditPage({
 
       {page && (
         <div className="mt-10">
-          <TemplatePicker
+          <BasePicker
             token={token}
             pageId={page.id}
-            current={getTemplateMeta(theme.preset).id}
+            current={getBase(page.baseId).id}
           />
         </div>
       )}

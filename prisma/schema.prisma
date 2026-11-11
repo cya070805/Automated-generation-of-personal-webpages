@@ -90,10 +90,14 @@ model Message {
   @@map("messages")
 }
 
-/// 呈现层：与内容分离，换模板不动内容
+/// 呈现层：与内容分离，换基底不动内容
 model Page {
   id        String   @id @default(cuid())
   resumeId  String
+  /// 基底 id：只决定气质（令牌），不决定版式
+  baseId    String   @default("paper")
+  /// 各槽位用哪条配方：{ hero: "hero.statement", ... }
+  recipeMap Json?
   theme     Json?
   layout    Json?
   createdAt DateTime @default(now())

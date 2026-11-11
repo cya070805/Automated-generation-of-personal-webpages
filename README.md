@@ -65,9 +65,12 @@ src/
     (app)/                 产品界面，带导航与页脚
       page.tsx             首页
       start/               三步向导（写经历 → 追问 → 确认文案）
-      edit/[token]/        看内容、挑版式
+      edit/[token]/        看内容、换基底
       settings/            模型接入设置页
     preview/[token]/       生成的主页，整页渲染，不套产品导航
+  components/
+    render/                渲染层：槽位组件 + SiteView（只吃 SiteData 与令牌）
+    primitives/            十二个原语（渐隐背景、颗粒、玻璃、滚动驱动……）
     api/
       llm/                 同源转发 / 测试连接 / 是否预置 Key
       resume/analyze/      抽取结构化内容 + 缺口分析
@@ -83,7 +86,7 @@ src/
   lib/
     llm/                   预设、转发、错误映射、浏览器端客户端
     ai/                    提示词、JSON 校验、模板模式兜底
-    templates/             模板登记表 + Paper / Terminal
+    templates/             六套基底（令牌）+ 配方库 + 默认组合
     site-data.ts           内容块 → 模板数据
     db.ts                  Prisma 单例
     tokens.ts              编辑 token / 分享 slug
@@ -104,7 +107,7 @@ docs/                      产品文档与生成脚本
 | POST | `/api/resume/answer` | 记录回答 |
 | POST | `/api/resume/draft` | 生成两版文案与溯源 |
 | PATCH | `/api/blocks/{id}` | 选版本 / 改内容 |
-| PATCH | `/api/pages/{id}` | 换模板（`{ preset }`），只动 `pages.theme` |
+| PATCH | `/api/pages/{id}` | 换基底（`{ baseId }`）或换某槽位配方（`{ recipeMap }`），只动 `pages` |
 | POST | `/api/projects` | 创建匿名项目，返回 `editToken` 与编辑链接 |
 | GET | `/api/projects/{token}` | 用编辑 token 读取项目（内容块 + 页面） |
 | GET | `/api/health` | 数据库连通性与十张表计数 |
@@ -114,6 +117,21 @@ docs/                      产品文档与生成脚本
 
 AI 管线：`解析（文件 → 文本）→ 抽取（JSON Schema 约束，失败重试一次）→ 缺口分析 → 一次一问 →
 两版文案（带 sourceQuote）`。没有 Key 或模型失败时自动退回模板模式，流程照样能走完。
+
+## 呈现层
+
+内容与呈现分离。页面只记两件事：`baseId`（哪套基底）和 `recipeMap`（每个槽位哪条配方），
+内容块一个字段都不动。
+
+```
+基底（6）  只给设计令牌：字体、色板、圆角、疏密、字号阶梯
+原语（12） 只给质感：颗粒、玻璃、扫描线、打字机、倾斜……
+配方（15） 只给讲法：「经历」用编号条目还是时间线
+```
+
+渲染层 `components/render/site-view.tsx` 只消费 `SiteData` 与令牌，不读数据库；
+编辑态与预览页共用同一个组件，所以「改完就能看见」。
+细节见 [基底与原语.md](docs/基底与原语.md)。
 
 ## 安全边界
 
@@ -132,8 +150,9 @@ Docker Compose 部署（未开始）。
 
 1. ~~骨架 + 数据模型 + 模型接入~~
 2. ~~内容闭环：解析 → 追问 → 文案确认~~
-3. 呈现闭环：~~版式系统 + 两套模板~~（Paper / Terminal）+ 结构化编辑 + PDF 导出
-4. 自由画布 + 两种导出（平台发布 / 部署包）
+3. 内容闭环：解析 → 追问 → 两版文案（提前做完）
+4. 基底与原语：~~六套基底 + 十二个原语 + 渲染层~~
+5. 配方库首批 20 个 + 编辑器双模式 + 两种导出（平台发布 / 部署包）
 
 ## 不做
 

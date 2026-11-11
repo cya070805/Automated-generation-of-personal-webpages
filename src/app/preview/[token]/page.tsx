@@ -5,7 +5,9 @@ import { PenLine } from "lucide-react";
 import { db } from "@/lib/db";
 import { isValidEditToken } from "@/lib/tokens";
 import { buildSiteData } from "@/lib/site-data";
-import { TemplateView, getTemplateMeta } from "@/lib/templates/registry";
+import { getBase } from "@/lib/templates/bases";
+import type { RecipeMap } from "@/lib/templates/types";
+import { SiteView } from "@/components/render/site-view";
 
 export const dynamic = "force-dynamic";
 
@@ -53,15 +55,16 @@ export default async function PreviewPage({
   if (!project) notFound();
 
   const resume = project.resumes[0];
-  const blocks = resume?.blocks ?? [];
-  const data = buildSiteData(blocks);
-
-  const theme = (resume?.pages[0]?.theme ?? {}) as { preset?: string };
-  const templateId = getTemplateMeta(theme.preset).id;
+  const data = buildSiteData(resume?.blocks ?? []);
+  const page = resume?.pages[0];
 
   return (
     <>
-      <TemplateView id={templateId} data={data} />
+      <SiteView
+        base={getBase(page?.baseId)}
+        data={data}
+        recipeMap={(page?.recipeMap ?? null) as RecipeMap | null}
+      />
 
       <Link
         href={`/edit/${token}`}
