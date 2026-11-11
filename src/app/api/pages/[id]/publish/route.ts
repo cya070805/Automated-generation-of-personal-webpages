@@ -34,9 +34,11 @@ export async function POST(
   const password = (body.password ?? "").trim();
   const noindex = body.noindex ?? true;
 
+  // 传了空字符串 = 清除密码；完全不传 = 保持原样
   const data = {
     noindex,
     ...(password ? { passwordHash: hashPassword(password) } : {}),
+    ...(body.password === "" ? { passwordHash: null } : {}),
   };
 
   const share = page.share

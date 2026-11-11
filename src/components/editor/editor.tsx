@@ -746,14 +746,17 @@ function SharePanel({
 
   const url = share ? `${typeof window !== "undefined" ? window.location.origin : ""}/p/${share.slug}` : "";
 
-  async function publish() {
+  async function publish(touchPassword = false) {
     setBusy(true);
     setError(null);
     try {
       const res = await fetch(`/api/pages/${pageId}/publish`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ password: password || undefined, noindex }),
+        body: JSON.stringify({
+          ...(touchPassword ? { password: password.trim() } : {}),
+          noindex,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message ?? "发布失败");
@@ -816,7 +819,7 @@ function SharePanel({
 
           <button
             type="button"
-            onClick={publish}
+            onClick={() => publish(false)}
             disabled={busy}
             className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-ink text-[13px] text-white disabled:opacity-50"
           >
@@ -856,7 +859,7 @@ function SharePanel({
 
         <button
           type="button"
-          onClick={publish}
+          onClick={() => publish(true)}
           disabled={busy}
           className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-line-strong text-[12.5px] text-ink-2 hover:bg-subtle disabled:opacity-50"
         >
