@@ -23,6 +23,8 @@
     "lucide-react": "^0.468.0",
     "mammoth": "^1.13.0",
     "next": "15.5.29",
+    "playwright-core": "^1.65.0",
+    "process": "^0.11.10",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tailwind-merge": "^2.6.0",

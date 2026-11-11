@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Copy, Loader2, Paperclip } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -56,7 +55,6 @@ function aiHeaders(): HeadersInit {
 }
 
 export function StartWizard() {
-  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -260,18 +258,20 @@ export function StartWizard() {
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
-            href={`/preview/${token}`}
+            href={`/edit/${token}`}
             className={buttonVariants({ size: "lg" })}
           >
-            看看主页
+            进编辑器调版式
             <ArrowRight />
           </Link>
-          <Button
-            variant="secondary"
-            onClick={() => router.push(`/edit/${token}`)}
+          <Link
+            href={`/preview/${token}`}
+            target="_blank"
+            rel="noreferrer"
+            className={buttonVariants({ variant: "secondary" })}
           >
-            改内容和模板
-          </Button>
+            先看看主页
+          </Link>
           <Link
             href="/start"
             className="inline-flex h-10 items-center rounded-lg px-3 text-[14px] text-muted hover:text-ink"

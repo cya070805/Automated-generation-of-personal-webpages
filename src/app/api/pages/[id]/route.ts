@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { isReadyBase } from "@/lib/templates/bases";
 import { SLOT_ORDER } from "@/lib/templates/recipes";
 import type { RecipeMap, SlotId } from "@/lib/templates/types";
+import type { SiteLayout, SiteTweaks } from "@/lib/site-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
 interface PageTheme {
   preset?: string;
   accent?: string;
+  tweaks?: SiteTweaks;
   [key: string]: unknown;
 }
 
@@ -18,18 +20,56 @@ function sanitizeRecipeMap(input: unknown): RecipeMap | null {
   if (!input || typeof input !== "object") return null;
   const source = input as Record<string, unknown>;
   const out: RecipeMap = {};
-
   for (const slot of SLOT_ORDER) {
     const value = source[slot];
     if (typeof value === "string") out[slot as SlotId] = value;
+  }
+  return out;
+}
+
+function sanitizeLayout(input: unknown): SiteLayout | null {
+  if (!input || typeof input !== "object") return null;
+  const source = input as Record<string, unknown>;
+
+  const clean = (value: unknown): SlotId[] =>
+    Array.isArray(value)
+      ? value.filter((item): item is SlotId =>
+          SLOT_ORDER.includes(item as SlotId),
+        )
+      : [];
+
+  return {
+    order: Array.isArray(source.order) ? clean(source.order) : undefined,
+    hidden: Array.isArray(source.hidden) ? clean(source.hidden) : undefined,
+  };
+}
+
+function clampLevel(value: unknown): number | undefined {
+  if (typeof value !== "number" || Number.isNaN(value)) return undefined;
+  return Math.max(0, Math.min(2, Math.round(value)));
+}
+
+function sanitizeTweaks(input: unknown): SiteTweaks | null {
+  if (!input || typeof input !== "object") return null;
+  const source = input as Record<string, unknown>;
+  const out: SiteTweaks = {};
+
+  const motion = clampLevel(source.motion);
+  const density = clampLevel(source.density);
+  const radius = clampLevel(source.radius);
+  if (motion !== undefined) out.motion = motion;
+  if (density !== undefined) out.density = density;
+  if (radius !== undefined) out.radius = radius;
+  if (typeof source.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(source.accent)) {
+    out.accent = source.accent;
   }
 
   return out;
 }
 
 /**
- * 换基底 / 换某个槽位的讲法。
- * 只动 pages.baseId 与 pages.recipeMap，内容块一个都不碰。
+ * 页面配置：换基底 / 换槽位配方 / 调模块顺序 / 拉滑杆。
+ * 只动 pages 这一行，内容块一个都不碰。
  */
 export async function PATCH(
   req: Request,
@@ -37,7 +77,13 @@ export async function PATCH(
 ) {
   const { id } = await params;
 
-  let body: { baseId?: string; preset?: string; recipeMap?: Record<string, string> };
+  let body: {
+    baseId?: string;
+    preset?: string;
+    recipeMap?: Record<string, string>;
+    layout?: unknown;
+    tweaks?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
@@ -65,19 +111,28 @@ export async function PATCH(
 
   const theme = (page.theme ?? {}) as PageTheme;
   const recipeMap =
-    body.recipeMap === undefined
-      ? undefined
-      : sanitizeRecipeMap(body.recipeMap);
+    body.recipeMap === undefined ? undefined : sanitizeRecipeMap(body.recipeMap);
+  const layout = sanitizeLayout(body.layout);
+  const tweaks = sanitizeTweaks(body.tweaks);
+
+  const nextTheme: PageTheme = { ...theme };
+  if (baseId) nextTheme.preset = baseId;
+  if (tweaks) nextTheme.tweaks = { ...(theme.tweaks ?? {}), ...tweaks };
 
   const updated = await db.page.update({
     where: { id },
     data: {
       ...(baseId ? { baseId } : {}),
       ...(recipeMap ? { recipeMap: recipeMap as Prisma.InputJsonValue } : {}),
-      theme: {
-        ...theme,
-        ...(baseId ? { preset: baseId } : {}),
-      } as Prisma.InputJsonValue,
+      ...(layout
+        ? {
+            layout: {
+              ...((page.layout ?? {}) as SiteLayout),
+              ...layout,
+            } as Prisma.InputJsonValue,
+          }
+        : {}),
+      theme: nextTheme as Prisma.InputJsonValue,
     },
   });
 
@@ -87,6 +142,7 @@ export async function PATCH(
       id: updated.id,
       baseId: updated.baseId,
       recipeMap: updated.recipeMap,
+      layout: updated.layout,
       theme: updated.theme,
     },
   });

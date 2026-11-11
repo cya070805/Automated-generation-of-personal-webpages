@@ -355,3 +355,27 @@ export function baseCssVars(base: BaseTokens): Record<string, string> {
     "--b-font-display": base.font.display,
   };
 }
+
+
+/**
+ * 打印用的令牌：不管是哪套基底，落到纸上都是白底黑字。
+ * 字体、字号、疏密保留，只把颜色和动效换掉——PDF 与页面同源渲染，不是二次排版。
+ */
+export function toPrintBase(base: BaseTokens): BaseTokens {
+  return {
+    ...base,
+    color: {
+      bg: "#ffffff",
+      surface: "#fafafa",
+      ink: "#111111",
+      ink2: "#333333",
+      muted: "#666666",
+      line: "#dcdcdc",
+      accent: "#111111",
+      onAccent: "#ffffff",
+    },
+    shape: { radius: "0px", borderWidth: "1px" },
+    motion: "none",
+    primitives: [],
+  };
+}

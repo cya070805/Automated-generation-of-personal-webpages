@@ -65,9 +65,10 @@ src/
     (app)/                 产品界面，带导航与页脚
       page.tsx             首页
       start/               三步向导（写经历 → 追问 → 确认文案）
-      edit/[token]/        看内容、换基底
       settings/            模型接入设置页
+    edit/[token]/          编辑器：左栏内容/基底/模块/微调/发布，右栏真页面
     preview/[token]/       生成的主页，整页渲染，不套产品导航
+    p/[slug]/              发布后的分享页（可选访问密码）
   components/
     render/                渲染层：槽位组件 + SiteView（只吃 SiteData 与令牌）
     primitives/            十二个原语（渐隐背景、颗粒、玻璃、滚动驱动……）
@@ -79,7 +80,12 @@ src/
       resume/draft/        两版文案 + 溯源
       resume/upload/       PDF / DOCX / TXT → 文本
       blocks/[id]/         选版本 / 改内容
-      pages/[id]/          换模板（只写 pages.theme）
+      pages/[id]/          换基底 / 换讲法 / 排序 / 调参（只写 pages 一行）
+      pages/[id]/publish/  发布与取消发布
+      share/[slug]/auth/   访问密码校验
+      ai/assist/           润色 / 翻译 / 按 JD 定制
+      export/[token]/pdf     简历 PDF（Playwright 打印同一路由）
+      export/[token]/package 整站部署包（单文件 HTML + Dockerfile + 说明）
       projects/            匿名项目（创建 / 按编辑 token 读取）
       health/              数据库自检
   components/              UI 与页面组件
@@ -107,7 +113,13 @@ docs/                      产品文档与生成脚本
 | POST | `/api/resume/answer` | 记录回答 |
 | POST | `/api/resume/draft` | 生成两版文案与溯源 |
 | PATCH | `/api/blocks/{id}` | 选版本 / 改内容 |
-| PATCH | `/api/pages/{id}` | 换基底（`{ baseId }`）或换某槽位配方（`{ recipeMap }`），只动 `pages` |
+| PATCH | `/api/pages/{id}` | 换基底 / 换配方 / 排模块 / 拉滑杆，只动 `pages` 一行 |
+| POST | `/api/pages/{id}/publish` | 发布到平台，返回 `/p/{slug}`；可设访问密码与 noindex |
+| DELETE | `/api/pages/{id}/publish` | 取消发布，链接立刻失效 |
+| POST | `/api/share/{slug}/auth` | 访问密码校验，发 httpOnly 凭证 |
+| POST | `/api/ai/assist` | 润色 / 译成英文 / 按 JD 定制一段文案 |
+| GET | `/api/export/{token}/pdf` | 简历 PDF |
+| GET | `/api/export/{token}/package` | 整站部署包（zip） |
 | POST | `/api/projects` | 创建匿名项目，返回 `editToken` 与编辑链接 |
 | GET | `/api/projects/{token}` | 用编辑 token 读取项目（内容块 + 页面） |
 | GET | `/api/health` | 数据库连通性与十张表计数 |
@@ -133,6 +145,18 @@ AI 管线：`解析（文件 → 文本）→ 抽取（JSON Schema 约束，失�
 编辑态与预览页共用同一个组件，所以「改完就能看见」。
 细节见 [基底与原语.md](docs/基底与原语.md)。
 
+## 编辑器
+
+`/edit/{token}` 是双栏：左边改，右边是真的页面（iframe 重载，不是缩略图）。
+
+| 面板 | 能做什么 |
+| --- | --- |
+| 内容 | 逐段改文字；润色 / 译成英文；贴 JD 批量定制经历与项目 |
+| 基底 | 六套基底一键换，换的是令牌 |
+| 模块 | 六个槽位排序、隐藏、换讲法 |
+| 微调 | 动效强度 / 密度 / 圆角三个滑杆 + 强调色 |
+| 发布 | `/p/{slug}` 链接、访问密码、noindex、PDF、部署包 |
+
 ## 安全边界
 
 - API Key 只存浏览器本地（`localStorage` 键名 `lvdao.settings.v1`），不上传、不入库。
@@ -152,7 +176,7 @@ Docker Compose 部署（未开始）。
 2. ~~内容闭环：解析 → 追问 → 文案确认~~
 3. 内容闭环：解析 → 追问 → 两版文案（提前做完）
 4. 基底与原语：~~六套基底 + 十二个原语 + 渲染层~~
-5. 配方库首批 20 个 + 编辑器双模式 + 两种导出（平台发布 / 部署包）
+5. ~~配方 21 条 + 编辑器（快速模式）+ 两种导出~~
 
 ## 不做
 

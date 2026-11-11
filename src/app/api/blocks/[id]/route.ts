@@ -10,6 +10,7 @@ interface BlockContent {
   chosen?: number;
   details?: string[];
   title?: string;
+  custom?: string;
   [key: string]: unknown;
 }
 
@@ -20,7 +21,13 @@ export async function PATCH(
 ) {
   const { id } = await params;
 
-  let body: { chosen?: number; versions?: string[]; details?: string[]; title?: string };
+  let body: {
+    chosen?: number;
+    versions?: string[];
+    details?: string[];
+    title?: string;
+    custom?: string | null;
+  };
   try {
     body = await req.json();
   } catch {
@@ -45,6 +52,8 @@ export async function PATCH(
   if (Array.isArray(body.versions)) next.versions = body.versions.slice(0, 2);
   if (Array.isArray(body.details)) next.details = body.details;
   if (typeof body.title === "string") next.title = body.title;
+  if (typeof body.custom === "string") next.custom = body.custom;
+  if (body.custom === null) delete next.custom;
 
   const updated = await db.resumeBlock.update({
     where: { id },

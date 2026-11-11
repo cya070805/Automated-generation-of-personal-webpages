@@ -3,30 +3,38 @@ import type { SiteData, SiteSection } from "@/lib/site-data";
 import type { BaseTokens, Recipe, RecipeMap, SlotId } from "@/lib/templates/types";
 import { baseCssVars } from "@/lib/templates/bases";
 import { getRecipe, resolveRecipeMap } from "@/lib/templates/recipes";
+import { resolveBaseTokens, resolveOrder, type SiteLayout, type SiteTweaks } from "@/lib/site-config";
 import { Scanline } from "@/components/primitives/static";
 import {
   AboutColumn,
-  HeroBento,
-  ProjectsStrip,
   AboutLead,
   ContactCard,
   ContactLineSlot,
   ExperienceRows,
   ExperienceTimeline,
+  HeroBento,
   HeroPoster,
   HeroPrompt,
   HeroSplit,
   HeroStatement,
   ProjectsCards,
+  ProjectsStrip,
   SectionLabel,
   SkillsChips,
   SkillsInline,
   SkillsMeter,
 } from "./slots";
+import {
+  AboutFacts,
+  AboutPull,
+  ContactBanner,
+  ExperienceCards,
+  ProjectsFeature,
+} from "./slots-extra";
 
 /**
  * 渲染层。
- * 只吃 SiteData + 基底令牌 + 配方表，不读数据库、不认路由。
+ * 只吃 SiteData + 基底令牌 + 配方表 + 模块顺序，不读数据库、不认路由。
  * 编辑态、托管页、导出包共用这一个组件，所以「所见 = 所得」。
  */
 
@@ -35,6 +43,7 @@ type RenderProps = {
   data: SiteData;
   recipe: Recipe;
   sections?: SiteSection[];
+  /** 这个块之前已经用掉几个编号，整页共用一套序号 */
   startIndex?: number;
 };
 
@@ -46,27 +55,31 @@ const LAYOUTS: Record<string, Renderer> = {
   poster: HeroPoster,
   split: HeroSplit,
   bento: HeroBento,
-  strip: ProjectsStrip,
   column: AboutColumn,
   lead: AboutLead,
+  facts: AboutFacts,
+  pull: AboutPull,
   rows: ExperienceRows,
   timeline: ExperienceTimeline,
-  cards: ProjectsCards,
+  "exp-cards": ExperienceCards,
+  "proj-cards": ProjectsCards,
+  feature: ProjectsFeature,
+  strip: ProjectsStrip,
   inline: SkillsInline,
   chips: SkillsChips,
   meter: SkillsMeter,
   line: ContactLineSlot,
   card: ContactCard,
+  banner: ContactBanner,
 };
 
-function Block({
+function renderSlot({
   slot,
   base,
   data,
   map,
   sections,
   startIndex,
-  first,
 }: {
   slot: SlotId;
   base: BaseTokens;
@@ -74,7 +87,6 @@ function Block({
   map: RecipeMap;
   sections?: SiteSection[];
   startIndex?: number;
-  first?: boolean;
 }): ReactNode {
   const recipe = getRecipe(map[slot]);
   if (!recipe) return null;
@@ -82,18 +94,13 @@ function Block({
   if (!Render) return null;
 
   return (
-    <div
-      style={first ? undefined : { marginTop: "var(--b-section-gap)" }}
-      className="break-inside-avoid"
-    >
-      <Render
-        base={base}
-        data={data}
-        recipe={recipe}
-        sections={sections}
-        startIndex={startIndex}
-      />
-    </div>
+    <Render
+      base={base}
+      data={data}
+      recipe={recipe}
+      sections={sections}
+      startIndex={startIndex}
+    />
   );
 }
 
@@ -101,12 +108,18 @@ export function SiteView({
   base,
   data,
   recipeMap,
+  layout,
+  tweaks,
 }: {
   base: BaseTokens;
   data: SiteData;
   recipeMap?: RecipeMap | null;
+  layout?: SiteLayout | null;
+  tweaks?: SiteTweaks | null;
 }) {
-  const map = resolveRecipeMap(base, recipeMap);
+  const tokens = resolveBaseTokens(base, tweaks);
+  const map = resolveRecipeMap(tokens, recipeMap);
+  const order = resolveOrder(layout);
 
   const experienceSections = data.sections.filter(
     (section) => section.kind === "experience" || section.kind === "education",
@@ -115,23 +128,99 @@ export function SiteView({
     (section) => section.kind === "project",
   );
 
-  const experienceGroups = new Set(
-    experienceSections.map((section) => section.kind),
-  ).size;
-  const projectsStart = experienceGroups;
-  const kinds = new Set(data.sections.map((section) => section.kind));
-  const skillsIndex = kinds.size + 1;
+  let groupIndex = 0;
+  const nodes: ReactNode[] = [];
 
-  const skillsRecipe = getRecipe(map.skills);
-  const SkillsRender = skillsRecipe ? LAYOUTS[skillsRecipe.layout] : null;
+  for (const slot of order) {
+    if (slot === "about" && !data.summary) continue;
+    if (slot === "experience" && experienceSections.length === 0) continue;
+    if (slot === "projects" && projectSections.length === 0) continue;
+    if (slot === "skills" && data.skills.length === 0) continue;
+
+    const first = nodes.length === 0;
+
+    if (slot === "experience") {
+      const start = groupIndex;
+      groupIndex += new Set(experienceSections.map((item) => item.kind)).size;
+      nodes.push(
+        <div
+          key={slot}
+          className="break-inside-avoid"
+          style={first ? undefined : { marginTop: "var(--b-section-gap)" }}
+        >
+          {renderSlot({
+            slot,
+            base: tokens,
+            data,
+            map,
+            sections: experienceSections,
+            startIndex: start,
+          })}
+        </div>,
+      );
+      continue;
+    }
+
+    if (slot === "projects") {
+      const start = groupIndex;
+      groupIndex += 1;
+      nodes.push(
+        <div
+          key={slot}
+          className="break-inside-avoid"
+          style={first ? undefined : { marginTop: "var(--b-section-gap)" }}
+        >
+          {renderSlot({
+            slot,
+            base: tokens,
+            data,
+            map,
+            sections: projectSections,
+            startIndex: start,
+          })}
+        </div>,
+      );
+      continue;
+    }
+
+    if (slot === "skills") {
+      const recipe = getRecipe(map.skills);
+      const label = groupIndex + 1;
+      groupIndex += 1;
+      if (!recipe) continue;
+      nodes.push(
+        <div
+          key={slot}
+          className="break-inside-avoid"
+          style={first ? undefined : { marginTop: "var(--b-section-gap)" }}
+        >
+          <SectionLabel base={tokens} label="技能" index={label} />
+          <div style={{ marginTop: "calc(var(--b-block-gap) - 4px)" }}>
+            {renderSlot({ slot, base: tokens, data, map })}
+          </div>
+        </div>,
+      );
+      continue;
+    }
+
+    nodes.push(
+      <div
+        key={slot}
+        className="break-inside-avoid"
+        style={first ? undefined : { marginTop: "var(--b-section-gap)" }}
+      >
+        {renderSlot({ slot, base: tokens, data, map })}
+      </div>,
+    );
+  }
 
   return (
     <main
       className="site relative min-h-dvh"
-      style={baseCssVars(base) as CSSProperties}
-      data-base={base.id}
+      style={baseCssVars(tokens) as CSSProperties}
+      data-base={tokens.id}
     >
-      {base.primitives.includes("scanline") && (
+      {tokens.primitives.includes("scanline") && (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[440px] opacity-70"
@@ -152,47 +241,7 @@ export function SiteView({
           paddingBottom: "clamp(72px, 9vw, 120px)",
         }}
       >
-        <Block slot="hero" base={base} data={data} map={map} first />
-
-        {data.summary && (
-          <Block slot="about" base={base} data={data} map={map} />
-        )}
-
-        {experienceSections.length > 0 && (
-          <Block
-            slot="experience"
-            base={base}
-            data={data}
-            map={map}
-            sections={experienceSections}
-            startIndex={0}
-          />
-        )}
-
-        {projectSections.length > 0 && (
-          <Block
-            slot="projects"
-            base={base}
-            data={data}
-            map={map}
-            sections={projectSections}
-            startIndex={projectsStart}
-          />
-        )}
-
-        {data.skills.length > 0 && skillsRecipe && SkillsRender && (
-          <div
-            className="break-inside-avoid"
-            style={{ marginTop: "var(--b-section-gap)" }}
-          >
-            <SectionLabel base={base} label="技能" index={skillsIndex} />
-            <div style={{ marginTop: "calc(var(--b-block-gap) - 4px)" }}>
-              <SkillsRender base={base} data={data} recipe={skillsRecipe} />
-            </div>
-          </div>
-        )}
-
-        <Block slot="contact" base={base} data={data} map={map} />
+        {nodes}
       </div>
     </main>
   );

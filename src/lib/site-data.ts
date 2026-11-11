@@ -37,6 +37,8 @@ interface BlockContent {
   items?: string[];
   versions?: string[];
   chosen?: number;
+  /** 用户在编辑器里直接改过的文字，优先级最高 */
+  custom?: string;
 }
 
 export const SECTION_LABELS: Record<string, string> = {
@@ -53,6 +55,12 @@ export function isSkillList(skills: string[]): boolean {
 const SECTION_ORDER = ["experience", "project", "education"];
 
 function pickText(content: BlockContent): string[] {
+  if (content.custom && content.custom.trim()) {
+    return content.custom
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
   const versions = content.versions ?? [];
   const chosen = content.chosen ?? 0;
   const picked = versions[chosen] ?? versions[0];
@@ -108,7 +116,7 @@ export function buildSiteData(blocks: ResumeBlock[]): SiteData {
   return {
     name: profileContent.name ?? "",
     headline: profileContent.headline ?? "",
-    summary: profileContent.summary ?? "",
+    summary: profileContent.custom?.trim() || profileContent.summary || "",
     email: profileContent.email ?? "",
     city: profileContent.city ?? "",
     sections,

@@ -93,6 +93,25 @@ export const RECIPES: Recipe[] = [
     motionCost: "none",
   },
 
+  {
+    id: "about.facts",
+    slot: "about",
+    name: "事实格",
+    layout: "facts",
+    compatible: ["bento", "studio", "gallery"],
+    primitives: ["glass"],
+    motionCost: "none",
+  },
+  {
+    id: "about.pull",
+    slot: "about",
+    name: "大引文",
+    layout: "pull",
+    compatible: ["editorial", "gallery"],
+    primitives: [],
+    motionCost: "none",
+  },
+
   // ——— 经历 ———
   {
     id: "experience.rows",
@@ -113,6 +132,16 @@ export const RECIPES: Recipe[] = [
     motionCost: "low",
   },
 
+  {
+    id: "experience.cards",
+    slot: "experience",
+    name: "经历卡片",
+    layout: "exp-cards",
+    compatible: ["bento", "studio", "gallery"],
+    primitives: ["tilt"],
+    motionCost: "low",
+  },
+
   // ——— 项目 ———
   {
     id: "projects.rows",
@@ -127,7 +156,7 @@ export const RECIPES: Recipe[] = [
     id: "projects.cards",
     slot: "projects",
     name: "卡片墙",
-    layout: "cards",
+    layout: "proj-cards",
     compatible: ["bento", "gallery", "studio"],
     primitives: ["glass", "tilt"],
     motionCost: "medium",
@@ -141,6 +170,16 @@ export const RECIPES: Recipe[] = [
     compatible: ["gallery", "studio"],
     primitives: ["scroll"],
     motionCost: "medium",
+  },
+
+  {
+    id: "projects.feature",
+    slot: "projects",
+    name: "主角项目",
+    layout: "feature",
+    compatible: ["paper", "editorial", "studio", "bento"],
+    primitives: [],
+    motionCost: "none",
   },
 
   // ——— 技能 ———
@@ -170,6 +209,16 @@ export const RECIPES: Recipe[] = [
     compatible: ["bento", "studio"],
     primitives: ["meter"],
     motionCost: "low",
+  },
+
+  {
+    id: "contact.banner",
+    slot: "contact",
+    name: "整条横幅",
+    layout: "banner",
+    compatible: ["studio", "bento", "terminal"],
+    primitives: [],
+    motionCost: "none",
   },
 
   // ——— 联系 ———
@@ -213,7 +262,7 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
   },
   editorial: {
     hero: "hero.poster",
-    about: "about.lead",
+    about: "about.pull",
     experience: "experience.timeline",
     projects: "projects.rows",
     skills: "skills.inline",
@@ -229,15 +278,15 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
   },
   studio: {
     hero: "hero.split",
-    about: "about.column",
+    about: "about.facts",
     experience: "experience.timeline",
     projects: "projects.cards",
     skills: "skills.meter",
-    contact: "contact.card",
+    contact: "contact.banner",
   },
   bento: {
     hero: "hero.bento",
-    about: "about.column",
+    about: "about.facts",
     experience: "experience.rows",
     projects: "projects.cards",
     skills: "skills.meter",
