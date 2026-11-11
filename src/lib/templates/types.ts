@@ -40,6 +40,21 @@ export type SlotId =
 
 export type MotionCost = "none" | "low" | "medium" | "high";
 
+/** 页框：页眉、章节号、章节分隔的做法 */
+export type FrameKind =
+  /** 印刷品：页眉一行细线 + 编号 */
+  | "rule"
+  /** 终端：窗口栏 + 提示符 */
+  | "chrome"
+  /** 杂志：报头 + 粗细双线 */
+  | "masthead"
+  /** 画廊：几乎不画线，只留极小的标签 */
+  | "none"
+  /** 工作室：可见网格底纹 */
+  | "grid"
+  /** 格子：每段一张卡 */
+  | "tile";
+
 export interface BaseTokens {
   id: BaseId;
   name: string;
@@ -52,18 +67,25 @@ export interface BaseTokens {
   color: {
     bg: string;
     surface: string;
+    /** 与 bg 只差一点点，用来给整段换底色 */
+    band: string;
     ink: string;
     ink2: string;
     muted: string;
     line: string;
     accent: string;
     onAccent: string;
+    /** 强调色的极浅底，标签和色块用 */
+    accentSoft: string;
   };
 
   font: {
     sans: string;
     mono: string;
     display: string;
+    displayWeight: number;
+    /** 大标题字距，中文一般 -0.03em 左右 */
+    displayTracking: string;
   };
 
   shape: {
@@ -73,29 +95,38 @@ export interface BaseTokens {
 
   /** 字号阶梯：基底决定「多大」，配方决定「怎么排」 */
   type: {
-    name: string;
+    /** 首屏姓名 */
+    display: string;
+    /** 二级区块标题（项目名、公司名） */
+    title: string;
     lead: string;
     body: string;
     sub: string;
     small: string;
+    /** 微标签：页眉、章节名、日期 */
+    meta: string;
   };
 
   space: {
+    /** 整个页面的最大宽度 */
     maxWidth: string;
     pageX: string;
     sectionGap: string;
     blockGap: string;
     /** 正文最大行宽，中文约 40–46 字 */
     measure: string;
+    /** 章节左侧小标题栏宽度；0 表示不分栏 */
+    rail: string;
   };
 
   rhythm: {
     density: "airy" | "normal" | "tight";
     /** 章节标题的记号形式 */
-    marker: "index" | "hash" | "rule" | "none";
+    marker: "index" | "hash" | "numbered" | "rule" | "none";
     /** 姓名一屏的排法 */
-    hero: "stack" | "prompt" | "poster" | "split";
+    hero: "column" | "prompt" | "masthead" | "plate" | "split" | "bento";
     divider: "hairline" | "block" | "none";
+    frame: FrameKind;
   };
 
   motion: MotionCost;

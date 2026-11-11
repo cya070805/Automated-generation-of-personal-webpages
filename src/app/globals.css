@@ -92,31 +92,376 @@
   }
 }
 
-/* ——— 生成主页：基底令牌的作用域 ——— */
+/* ══════════════════════════════════════════════════════════════
+   生成主页：基底令牌的作用域
+   渲染层只认 --b-* 变量，不认具体是哪一套基底。
+   ══════════════════════════════════════════════════════════════ */
+
 .site {
+  position: relative;
   background: var(--b-bg);
   color: var(--b-ink);
   font-family: var(--b-font-sans);
   font-size: var(--b-size-body);
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 .site-mono {
   font-family: var(--b-font-mono);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .site-display {
   font-family: var(--b-font-display);
-  letter-spacing: -0.025em;
+  font-weight: var(--b-weight-display);
+  letter-spacing: var(--b-tracking-display);
 }
 
 .site-inner {
   width: 100%;
   max-width: var(--b-maxw);
   margin-inline: auto;
-  padding-inline: var(--b-px);
+  padding-inline: clamp(20px, 5vw, var(--b-px));
+}
+
+/* ——— 首屏 ——— */
+
+.site-hero {
+  padding-top: clamp(40px, 6vw, 76px);
+  padding-bottom: clamp(40px, 5.4vw, 64px);
+}
+
+.site-h1 {
+  font-family: var(--b-font-display);
+  font-size: var(--b-size-display);
+  font-weight: var(--b-weight-display);
+  letter-spacing: var(--b-tracking-display);
+  line-height: 1.02;
+  color: var(--b-ink);
+  text-wrap: balance;
+}
+
+.site-standfirst {
+  font-size: var(--b-size-lead);
+  line-height: 1.62;
+  color: var(--b-ink-2);
+  max-width: 30em;
+  text-wrap: pretty;
+}
+
+/* 首屏底部那行事实：邮箱 / 城市 / 现在 */
+.site-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 40px;
+  font-size: var(--b-size-meta);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--b-muted);
+}
+
+.site-facts b {
+  display: block;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: var(--b-size-sub);
+  color: var(--b-ink);
+  margin-top: 3px;
+}
+
+/* 微标签 + 小圆点 */
+.site-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--b-size-meta);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--b-muted);
+  font-family: var(--b-font-mono);
+}
+
+.site-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--b-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-accent) 16%, transparent);
+}
+
+/* ——— 页框 ——— */
+
+.site-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 16px;
+  border-bottom: 1px solid var(--b-line);
+  font-family: var(--b-font-mono);
+  font-size: var(--b-size-meta);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--b-muted);
+}
+
+.site-head .site-head-name {
+  color: var(--b-ink);
+  letter-spacing: 0.1em;
+}
+
+/* 终端：窗口栏 */
+.site[data-base="terminal"] .site-head {
+  border: 1px solid var(--b-line);
+  border-radius: 10px 10px 0 0;
+  background: var(--b-surface);
+  padding: 10px 14px;
+  margin-top: 24px;
+  border-bottom-color: var(--b-line);
+}
+.site-window-dots {
+  display: inline-flex;
+  gap: 6px;
+  margin-right: 4px;
+}
+.site-window-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--b-line);
+  display: block;
+}
+
+/* 杂志：报头 */
+.site[data-base="editorial"] .site-head {
+  border-bottom: 0;
+  padding-bottom: 6px;
+  letter-spacing: 0.22em;
+}
+.site-rule-double {
+  border-top: 2px solid var(--b-ink);
+  border-bottom: 1px solid var(--b-ink);
+  height: 4px;
+}
+
+/* 工作室：网格底纹页眉 */
+.site[data-base="studio"] .site-head {
+  border-bottom-color: color-mix(in srgb, var(--b-ink) 12%, transparent);
+}
+
+/* ——— 章节：左小标题栏 + 右正文 ——— */
+
+.site-section {
+  display: grid;
+  grid-template-columns: var(--b-rail) minmax(0, 1fr);
+  column-gap: clamp(20px, 3.6vw, 56px);
+  align-items: start;
+}
+
+.site-rail {
+  position: sticky;
+  top: 28px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 4px;
+}
+
+.site-num {
+  font-family: var(--b-font-mono);
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--b-ink);
+  opacity: 0.16;
+  letter-spacing: -0.04em;
+}
+
+.site-section--flat {
+  display: block;
+}
+
+/* 页框带线的基底：每段开头画一条横线，把整页串成目录 */
+.site[data-frame="rule"] .site-section,
+.site[data-frame="masthead"] .site-section,
+.site[data-frame="grid"] .site-section {
+  border-top: 1px solid var(--b-line);
+  padding-top: clamp(22px, 2.6vw, 36px);
+}
+
+.site[data-frame="masthead"] .site-section {
+  border-top: 1px solid var(--b-ink);
+  border-top-color: color-mix(in srgb, var(--b-ink) 26%, transparent);
+}
+
+.site-rail-label {
+  font-family: var(--b-font-mono);
+  font-size: var(--b-size-meta);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--b-muted);
+}
+
+.site[data-base="editorial"] .site-num {
+  font-family: var(--b-font-display);
+  opacity: 1;
+  font-size: clamp(26px, 2.6vw, 36px);
+  color: var(--b-accent);
+  letter-spacing: 0;
+}
+.site[data-base="editorial"] .site-rail-label {
+  color: var(--b-ink);
+  letter-spacing: 0.26em;
+}
+
+.site[data-base="terminal"] .site-num {
+  opacity: 1;
+  color: var(--b-accent);
+  font-size: clamp(20px, 2vw, 26px);
+}
+
+.site[data-base="gallery"] .site-rail-label,
+.site[data-base="bento"] .site-rail-label {
+  letter-spacing: 0.24em;
+}
+
+/* 章节之间的分隔 */
+.site-divider {
+  height: 1px;
+  background: var(--b-line);
+}
+.site[data-base="bento"] .site-divider,
+.site[data-base="studio"] .site-divider {
+  height: 0;
+}
+
+@media (max-width: 880px) {
+  .site-section {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 18px;
+  }
+  .site-rail {
+    position: static;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    padding-top: 0;
+  }
+  .site-num {
+    font-size: 18px;
+    opacity: 0.35;
+  }
+}
+
+/* ——— 大气层：每套基底自己的背景 ——— */
+
+.site-atmos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.site-atmos::before,
+.site-atmos::after {
+  content: "";
+  position: absolute;
+}
+
+.site[data-base="studio"] .site-atmos::before {
+  top: -320px;
+  left: -180px;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--b-accent) 26%, transparent),
+    transparent 62%
+  );
+  filter: blur(10px);
+}
+
+.site[data-base="studio"] .site-atmos::after {
+  inset: 0;
+  background-image: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--b-ink) 5%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--b-ink) 5%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 88px 88px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 10%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 10%, transparent 72%);
+}
+
+.site[data-base="terminal"] .site-atmos::before {
+  top: -260px;
+  left: 50%;
+  translate: -50% 0;
+  width: 1000px;
+  height: 620px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--b-accent) 12%, transparent),
+    transparent 68%
+  );
+}
+
+.site[data-base="paper"] .site-atmos::before {
+  top: -220px;
+  right: -140px;
+  width: 780px;
+  height: 620px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--b-accent) 7%, transparent),
+    transparent 70%
+  );
+}
+
+.site[data-base="bento"] .site-atmos::before {
+  inset: 0;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--b-ink) 9%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 58%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 58%);
+}
+
+.site[data-base="editorial"] .site-atmos::before {
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--b-ink) 3%, transparent),
+    transparent 30%
+  );
+}
+
+/* ——— 入场 ——— */
+
+.site-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-reveal[data-shown="1"] {
+  opacity: 1;
+  transform: none;
 }
 
 .site-caret {
@@ -150,10 +495,25 @@
   .site-float {
     animation: none;
   }
+  .site-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 @media print {
   .site-caret {
     display: none;
+  }
+  .site-atmos {
+    display: none;
+  }
+  .site-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .site-rail {
+    position: static;
   }
 }
