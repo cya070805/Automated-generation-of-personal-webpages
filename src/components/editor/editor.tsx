@@ -22,6 +22,7 @@ import {
   type SiteTweaks,
 } from "@/lib/site-config";
 import { useSettings } from "@/store/settings-store";
+import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 function aiHeaders(): HeadersInit {
@@ -1275,7 +1276,11 @@ function SharePanel({
 
   async function copy() {
     if (!url) return;
-    await navigator.clipboard.writeText(url);
+    const ok = await copyText(url);
+    if (!ok) {
+      window.prompt("复制失败，请手动复制这条链接：", url);
+      return;
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
   }

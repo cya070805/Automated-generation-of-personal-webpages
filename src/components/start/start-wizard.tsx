@@ -8,6 +8,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { ChatComposer } from "@/components/ui/chat-composer";
 import { useSettings } from "@/store/settings-store";
 import { SKILL_GROUPS, SKILL_LIMIT, normalizeSkills } from "@/lib/skills";
+import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 interface BlockDTO {
@@ -323,7 +324,11 @@ export function StartWizard() {
 
   async function copyLink() {
     if (!editLink) return;
-    await navigator.clipboard.writeText(editLink);
+    const ok = await copyText(editLink);
+    if (!ok) {
+      window.prompt("复制失败，请手动复制这条链接：", editLink);
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);
   }
