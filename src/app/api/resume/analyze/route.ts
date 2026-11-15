@@ -79,7 +79,6 @@ export async function POST(req: Request) {
   });
 
   let extracted: Extracted;
-  let gaps: Gap[];
   let mode: "ai" | "template" = "ai";
   let warning: { code: string; message: string } | undefined;
   let usedAi = false;
@@ -108,7 +107,7 @@ export async function POST(req: Request) {
   if (body.role) extracted.headline = body.role;
   if (body.email) extracted.email = body.email.trim();
 
-  gaps = usedAi
+  const gaps: Gap[] = usedAi
     ? await findGaps(config, extracted, missingSections(extracted))
     : templateGaps(extracted);
 
