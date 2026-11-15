@@ -19,14 +19,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link className="hover:text-ink" href="/settings">
               模型设置
             </Link>
-            <a
-              className="hover:text-ink"
-              href="https://github.com/cya070805/Automated-generation-of-personal-webpages"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub
-            </a>
           </div>
         </div>
       </footer>

@@ -55,3 +55,7 @@ next-env.d.ts
 
 # 参考截图（B 站视频画面，仅本地留存）
 docs/refs/*.png
+
+# 本地临时日志
+.tmp_*
+*.log
