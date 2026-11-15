@@ -125,22 +125,30 @@ export function Tilt({
   );
 }
 
-/** 12 滚动驱动 */
+/**
+ * 12 滚动驱动（渐显）—— 页面上唯一每个章节都会发生的动效。
+ * 强度是连续的 0–100：0 完全不动，50 是 10px 渐显，100 是 20px 且更慢。
+ * 值来自「动效强度」滑杆，SSR 就能决定首帧，不会先闪一下再淡入。
+ */
 export function Reveal({
   children,
   className = "",
   delay = 0,
+  motion = 50,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  motion?: number;
 }) {
+  const amount = Math.min(100, Math.max(0, motion));
+  const still = amount <= 4;
   const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
+  const [shown, setShown] = useState(still);
 
   useEffect(() => {
     const node = ref.current;
-    if (!node) return;
+    if (!node || still) return;
     if (prefersReduced()) {
       setShown(true);
       return;
@@ -160,19 +168,26 @@ export function Reveal({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [still]);
+
+  const lift = Math.round((2 + amount * 0.18) * 10) / 10;
+  const speed = Math.round((0.32 + amount * 0.0038) * 100) / 100;
 
   return (
     <div
       ref={ref}
       className={className}
       data-shown={shown ? "1" : "0"}
-      style={{
-        transitionDelay: `${delay}ms`,
-        opacity: shown ? 1 : 0,
-        transform: shown ? "none" : "translateY(10px)",
-        transition: "opacity .5s ease, transform .5s ease",
-      }}
+      style={
+        still
+          ? undefined
+          : {
+              transitionDelay: `${delay}ms`,
+              opacity: shown ? 1 : 0,
+              transform: shown ? "none" : `translateY(${lift}px)`,
+              transition: `opacity ${speed}s ease, transform ${speed}s ease`,
+            }
+      }
     >
       {children}
     </div>

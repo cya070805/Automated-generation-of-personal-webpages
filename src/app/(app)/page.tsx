@@ -24,7 +24,7 @@ export default function HomePage() {
   return (
     <div className="fade-up">
       <section className="max-w-[720px]">
-        <h1 className="text-balance text-[34px] leading-[1.16] tracking-[-0.03em] text-ink sm:text-[54px] sm:leading-[1.1]">
+        <h1 className="text-balance text-[34px] leading-[1.16] tracking-[-0.01em] text-ink sm:text-[54px] sm:leading-[1.1]">
           把经历说清楚，
           <br />
           主页自己长出来。

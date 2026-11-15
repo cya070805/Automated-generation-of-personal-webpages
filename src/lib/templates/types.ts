@@ -14,7 +14,11 @@ export type BaseId =
   | "editorial"
   | "gallery"
   | "studio"
-  | "bento";
+  | "bento"
+  | "mono"
+  | "cinema"
+  | "frame"
+  | "reel";
 
 export type PrimitiveId =
   | "gradient-grid"
@@ -35,6 +39,7 @@ export type SlotId =
   | "about"
   | "experience"
   | "projects"
+  | "education"
   | "skills"
   | "contact";
 
@@ -63,6 +68,14 @@ export interface BaseTokens {
   audience: string;
   /** ready = 可选；planned = 只在代码里占位 */
   status: "ready" | "planned";
+
+  /**
+   * 整页骨架。基底决定的不是「长什么样」而是「怎么翻」：
+   *   stack —— 常规长页，从上往下滚（默认）
+   *   wheel —— 左侧一个大框装一个模块，右侧轮盘滚轮 / 拖动翻页
+   * 只影响外壳，不动槽位配方：同一个模块放进哪个壳都还是那个模块。
+   */
+  shell?: "stack" | "wheel";
 
   color: {
     bg: string;
@@ -129,6 +142,29 @@ export interface BaseTokens {
     frame: FrameKind;
   };
 
+  /**
+   * 结构的开关。
+   *
+   * 只换颜色和字体，六套基底就是六套皮肤——用户在选基底的界面上看不出区别，
+   * 生成出来的页面也长得一样。所以基底还要决定「这一页是怎么搭的」：
+   * 首屏的形、章节号的样子、标题放在哪、底纹、装饰件、卡片怎么做。
+   * 这几项在 CSS 里落成 data-* 属性，渲染层按属性分支，不认基底名。
+   */
+  dna: {
+    /** 首屏的形 */
+    hero: "sheet" | "window" | "masthead" | "plate" | "stage" | "grid" | "poster" | "orbit" | "frame";
+    /** 章节号 */
+    num: "ghost" | "accent" | "circled" | "none";
+    /** 章节标题的位置 */
+    label: "rail" | "overline" | "vertical" | "inline" | "chip";
+    /** 底纹 */
+    texture: "paper" | "scan" | "noise" | "none" | "mesh" | "dots";
+    /** 装饰件 */
+    ornament: "crop" | "chrome" | "folio" | "none" | "glow" | "tile";
+    /** 卡片 */
+    card: "flat" | "outline" | "elevated" | "glass";
+  };
+
   motion: MotionCost;
   primitives: PrimitiveId[];
   /** 选择卡片里画缩略图用 */
@@ -151,7 +187,6 @@ export interface Recipe {
   requires?: { images?: number };
   compatible: BaseId[];
   primitives: PrimitiveId[];
-  motionCost: MotionCost;
   params?: Record<string, string | number | boolean>;
 }
 

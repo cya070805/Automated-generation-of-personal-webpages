@@ -38,7 +38,7 @@ export function PasswordGate({ slug, name }: { slug: string; name: string }) {
     <main className="flex min-h-dvh items-center justify-center bg-[#fafaf9] px-6">
       <form onSubmit={submit} className="w-full max-w-[360px]">
         <p className="text-[12.5px] text-[#a0a1a5]">受密码保护的主页</p>
-        <h1 className="mt-2 text-[22px] tracking-[-0.02em] text-[#111214]">
+        <h1 className="mt-2 text-[22px] tracking-[-0.01em] text-[#111214]">
           {name}
         </h1>
         <p className="mt-2 text-[13px] leading-[1.7] text-[#737579]">

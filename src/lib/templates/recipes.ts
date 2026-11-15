@@ -22,18 +22,49 @@ const ALL_BASES: BaseId[] = [
   "gallery",
   "studio",
   "bento",
+  "mono",
+  "cinema",
+  "frame",
+  "reel",
 ];
 
 export const RECIPES: Recipe[] = [
   // ——— 首屏 ———
   {
+    id: "hero.frame",
+    slot: "hero",
+    name: "方框",
+    layout: "frame",
+    compatible: ["frame"],
+    primitives: ["grain"],
+
+  },
+  {
+    id: "hero.poster",
+    slot: "hero",
+    name: "海报",
+    layout: "poster",
+    compatible: ["mono"],
+    primitives: ["grain"],
+
+  },
+  {
+    id: "hero.orbit",
+    slot: "hero",
+    name: "环形",
+    layout: "orbit",
+    compatible: ["cinema"],
+    primitives: ["particles"],
+
+  },
+  {
     id: "hero.statement",
     slot: "hero",
     name: "陈述式",
     layout: "statement",
-    compatible: ["paper", "bento", "gallery"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
   {
     id: "hero.prompt",
@@ -42,7 +73,7 @@ export const RECIPES: Recipe[] = [
     layout: "prompt",
     compatible: ["terminal", "studio"],
     primitives: ["typewriter"],
-    motionCost: "low",
+
   },
   {
     id: "hero.masthead",
@@ -51,25 +82,25 @@ export const RECIPES: Recipe[] = [
     layout: "masthead",
     compatible: ["editorial"],
     primitives: ["grain"],
-    motionCost: "low",
+
   },
   {
     id: "hero.plate",
     slot: "hero",
     name: "大图版",
     layout: "plate",
-    compatible: ["gallery", "studio"],
+    compatible: ALL_BASES,
     primitives: ["mask"],
-    motionCost: "low",
+
   },
   {
     id: "hero.split",
     slot: "hero",
     name: "左右分栏",
     layout: "split",
-    compatible: ["studio", "bento"],
+    compatible: ALL_BASES,
     primitives: ["gradient-grid"],
-    motionCost: "medium",
+
   },
 
   {
@@ -79,7 +110,7 @@ export const RECIPES: Recipe[] = [
     layout: "bento",
     compatible: ["bento"],
     primitives: ["glass"],
-    motionCost: "low",
+
   },
 
   // ——— 关于 ———
@@ -90,26 +121,26 @@ export const RECIPES: Recipe[] = [
     layout: "column",
     compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
   {
     id: "about.lead",
     slot: "about",
     name: "引文块",
     layout: "lead",
-    compatible: ["editorial", "gallery"],
+    compatible: ALL_BASES,
     primitives: ["grain"],
-    motionCost: "none",
+
   },
 
   {
-    id: "about.facts",
+    id: "about.points",
     slot: "about",
-    name: "事实格",
-    layout: "facts",
-    compatible: ["bento", "studio", "gallery"],
+    name: "要点格",
+    layout: "points",
+    compatible: ALL_BASES,
     primitives: ["glass"],
-    motionCost: "none",
+
   },
   {
     id: "about.pull",
@@ -118,7 +149,7 @@ export const RECIPES: Recipe[] = [
     layout: "pull",
     compatible: ["editorial", "gallery"],
     primitives: [],
-    motionCost: "none",
+
   },
 
   // ——— 经历 ———
@@ -127,18 +158,47 @@ export const RECIPES: Recipe[] = [
     slot: "experience",
     name: "条目式",
     layout: "rows",
-    compatible: ["paper", "terminal", "bento"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
+  },
+  {
+    id: "experience.boxes",
+    slot: "experience",
+    name: "方框墙",
+    layout: "boxes",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "experience.metric",
+    slot: "experience",
+    name: "大数字",
+    layout: "showcase",
+    compatible: ALL_BASES,
+    primitives: [],
+
+    params: { emphasis: "metric" },
+  },
+  {
+    id: "experience.headline",
+    slot: "experience",
+    name: "大字抬头",
+    layout: "showcase",
+    compatible: ALL_BASES,
+    primitives: [],
+
+    params: { emphasis: "title" },
   },
   {
     id: "experience.timeline",
     slot: "experience",
     name: "时间线",
     layout: "timeline",
-    compatible: ["editorial", "gallery", "studio"],
+    compatible: ALL_BASES,
     primitives: ["scroll"],
-    motionCost: "low",
+
   },
 
   {
@@ -146,9 +206,9 @@ export const RECIPES: Recipe[] = [
     slot: "experience",
     name: "经历卡片",
     layout: "exp-cards",
-    compatible: ["bento", "studio", "gallery"],
+    compatible: ALL_BASES,
     primitives: ["tilt"],
-    motionCost: "low",
+
   },
 
   // ——— 项目 ———
@@ -157,20 +217,57 @@ export const RECIPES: Recipe[] = [
     slot: "projects",
     name: "清单",
     layout: "rows",
-    compatible: ["paper", "terminal", "editorial"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
   {
-    id: "projects.cards",
+    id: "projects.band",
     slot: "projects",
-    name: "卡片墙",
-    layout: "proj-cards",
-    compatible: ["bento", "gallery", "studio"],
-    primitives: ["glass", "tilt"],
-    motionCost: "medium",
-  },
+    name: "横向带",
+    layout: "band",
+    compatible: ALL_BASES,
+    primitives: ["scroll"],
 
+  },
+  {
+    id: "projects.boxes",
+    slot: "projects",
+    name: "方框墙",
+    layout: "boxes",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "projects.stagger",
+    slot: "projects",
+    name: "错位",
+    layout: "stagger",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "projects.metric",
+    slot: "projects",
+    name: "大数字",
+    layout: "showcase",
+    compatible: ALL_BASES,
+    primitives: [],
+
+    params: { emphasis: "metric" },
+  },
+  {
+    id: "projects.headline",
+    slot: "projects",
+    name: "大字抬头",
+    layout: "showcase",
+    compatible: ALL_BASES,
+    primitives: [],
+
+    params: { emphasis: "title" },
+  },
   {
     id: "projects.strip",
     slot: "projects",
@@ -178,7 +275,7 @@ export const RECIPES: Recipe[] = [
     layout: "strip",
     compatible: ["gallery", "studio"],
     primitives: ["scroll"],
-    motionCost: "medium",
+
   },
 
   {
@@ -186,9 +283,9 @@ export const RECIPES: Recipe[] = [
     slot: "projects",
     name: "主角项目",
     layout: "feature",
-    compatible: ["paper", "editorial", "studio", "bento"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
 
   // ——— 技能 ———
@@ -197,27 +294,36 @@ export const RECIPES: Recipe[] = [
     slot: "skills",
     name: "一行带过",
     layout: "inline",
-    compatible: ["paper", "editorial"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
+  },
+  {
+    id: "skills.ring",
+    slot: "skills",
+    name: "索引行",
+    layout: "ring",
+    compatible: ALL_BASES,
+    primitives: ["magnetic"],
+
   },
   {
     id: "skills.chips",
     slot: "skills",
     name: "标签",
     layout: "chips",
-    compatible: ["terminal", "gallery"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
   {
     id: "skills.meter",
     slot: "skills",
     name: "分组网格",
     layout: "meter",
-    compatible: ["bento", "studio"],
+    compatible: ALL_BASES,
     primitives: ["meter"],
-    motionCost: "low",
+
   },
 
   {
@@ -225,9 +331,9 @@ export const RECIPES: Recipe[] = [
     slot: "contact",
     name: "整条横幅",
     layout: "banner",
-    compatible: ["studio", "bento", "terminal"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
 
   // ——— 联系 ———
@@ -236,18 +342,228 @@ export const RECIPES: Recipe[] = [
     slot: "contact",
     name: "一行联系方式",
     layout: "line",
-    compatible: ["paper", "terminal", "editorial"],
+    compatible: ALL_BASES,
     primitives: [],
-    motionCost: "none",
+
   },
   {
     id: "contact.card",
     slot: "contact",
     name: "收尾卡片",
     layout: "card",
-    compatible: ["bento", "gallery", "studio"],
+    compatible: ALL_BASES,
     primitives: ["glass"],
-    motionCost: "low",
+
+  },
+
+  // ——— 第二批：换的是读法，不换颜色 ———
+  {
+    id: "about.dropcap",
+    slot: "about",
+    name: "首字下沉",
+    layout: "dropcap",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "about.numbered",
+    slot: "about",
+    name: "编号条目",
+    layout: "numbered",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "experience.table",
+    slot: "experience",
+    name: "表格",
+    layout: "etable",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "experience.steps",
+    slot: "experience",
+    name: "阶梯",
+    layout: "steps",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "projects.index",
+    slot: "projects",
+    name: "索引",
+    layout: "pindex",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "projects.stack",
+    slot: "projects",
+    name: "横向卡",
+    layout: "pstack",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "skills.folder",
+    slot: "skills",
+    name: "文件夹",
+    layout: "folder",
+    compatible: ALL_BASES,
+    primitives: [],
+  },
+  {
+    id: "skills.bubble",
+    slot: "skills",
+    name: "标签球",
+    layout: "tagbubble",
+    compatible: ALL_BASES,
+    primitives: [],
+  },
+  {
+    id: "skills.matrix",
+    slot: "skills",
+    name: "分类分栏",
+    layout: "smatrix",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "skills.rows",
+    slot: "skills",
+    name: "分类行",
+    layout: "srows",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "contact.ticket",
+    slot: "contact",
+    name: "票据",
+    layout: "ticket",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "contact.bubble",
+    slot: "contact",
+    name: "气泡菜单",
+    layout: "bubble",
+    compatible: ALL_BASES,
+    primitives: [],
+  },
+
+  // ——— 第三批：靠留白和细线，不加边框底色 ———
+  {
+    id: "hero.center",
+    slot: "hero",
+    name: "居中",
+    layout: "center",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "about.twocol",
+    slot: "about",
+    name: "双栏正文",
+    layout: "twocol",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "experience.compact",
+    slot: "experience",
+    name: "紧凑",
+    layout: "compact",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "projects.minimal",
+    slot: "projects",
+    name: "细线两列",
+    layout: "pmin",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "skills.grid3",
+    slot: "skills",
+    name: "三列",
+    layout: "grid3",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "contact.bigmail",
+    slot: "contact",
+    name: "大邮箱",
+    layout: "bigmail",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+
+  // ——— 教育独立成槽：和经历分开选，读书和上班本来不是一回事 ———
+  {
+    id: "education.rows",
+    slot: "education",
+    name: "条目式",
+    layout: "rows",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "education.compact",
+    slot: "education",
+    name: "紧凑",
+    layout: "compact",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "education.cards",
+    slot: "education",
+    name: "卡片",
+    layout: "exp-cards",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "education.timeline",
+    slot: "education",
+    name: "时间线",
+    layout: "timeline",
+    compatible: ALL_BASES,
+    primitives: [],
+
+  },
+  {
+    id: "education.table",
+    slot: "education",
+    name: "表格",
+    layout: "etable",
+    compatible: ALL_BASES,
+    primitives: [],
+
   },
 ];
 
@@ -258,6 +574,7 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
     about: "about.column",
     experience: "experience.rows",
     projects: "projects.rows",
+    education: "education.rows",
     skills: "skills.inline",
     contact: "contact.line",
   },
@@ -266,6 +583,7 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
     about: "about.column",
     experience: "experience.rows",
     projects: "projects.rows",
+    education: "education.rows",
     skills: "skills.chips",
     contact: "contact.line",
   },
@@ -274,6 +592,7 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
     about: "about.pull",
     experience: "experience.timeline",
     projects: "projects.rows",
+    education: "education.timeline",
     skills: "skills.inline",
     contact: "contact.line",
   },
@@ -282,24 +601,63 @@ export const DEFAULT_RECIPE_MAP: Record<BaseId, RecipeMap> = {
     about: "about.lead",
     experience: "experience.timeline",
     projects: "projects.strip",
+    education: "education.timeline",
     skills: "skills.chips",
     contact: "contact.card",
   },
   studio: {
     hero: "hero.split",
-    about: "about.facts",
+    about: "about.points",
     experience: "experience.timeline",
-    projects: "projects.cards",
+    projects: "projects.boxes",
+    education: "education.timeline",
     skills: "skills.meter",
     contact: "contact.banner",
   },
   bento: {
     hero: "hero.bento",
-    about: "about.facts",
+    about: "about.points",
     experience: "experience.rows",
-    projects: "projects.cards",
+    projects: "projects.boxes",
+    education: "education.rows",
     skills: "skills.meter",
     contact: "contact.card",
+  },
+  mono: {
+    hero: "hero.poster",
+    about: "about.pull",
+    experience: "experience.metric",
+    projects: "projects.band",
+    education: "education.compact",
+    skills: "skills.ring",
+    contact: "contact.line",
+  },
+  cinema: {
+    hero: "hero.orbit",
+    about: "about.lead",
+    experience: "experience.headline",
+    projects: "projects.stagger",
+    education: "education.compact",
+    skills: "skills.ring",
+    contact: "contact.banner",
+  },
+  frame: {
+    hero: "hero.frame",
+    about: "about.points",
+    experience: "experience.boxes",
+    projects: "projects.band",
+    education: "education.cards",
+    skills: "skills.ring",
+    contact: "contact.card",
+  },
+  reel: {
+    hero: "hero.statement",
+    about: "about.lead",
+    experience: "experience.compact",
+    projects: "projects.rows",
+    education: "education.compact",
+    skills: "skills.ring",
+    contact: "contact.bigmail",
   },
 };
 
@@ -308,6 +666,7 @@ export const SLOT_ORDER: SlotId[] = [
   "about",
   "experience",
   "projects",
+  "education",
   "skills",
   "contact",
 ];
@@ -346,3 +705,5 @@ export function recipesForSlot(slot: SlotId, baseId: BaseId): Recipe[] {
     (recipe) => recipe.slot === slot && recipe.compatible.includes(baseId),
   );
 }
+
+

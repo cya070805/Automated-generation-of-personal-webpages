@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { applyAnswerToBlock } from "@/lib/collect";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
     },
   });
 
-  // 记过的问答留一条痕迹，方便后面查为什么这么写
+  // 记过的问答留一条痕迹，方便后面查为什么这么写；
+  // 同时把「简介 / 教育 / 技能 / 项目 / 城市」这类板块问题直接落成内容块。
   if (!body.skip && body.question && answer) {
     const session = await db.chatSession.findUnique({
       where: { id: body.sessionId },
@@ -62,6 +64,15 @@ export async function POST(req: Request) {
           },
         },
       });
+
+      if (body.field) {
+        try {
+          await applyAnswerToBlock(session.resumeId, body.field, answer);
+        } catch (error) {
+          // 落块失败不能把这一问的答案吞掉：note 已经存下了，写文案时还用得上
+          console.error("applyAnswerToBlock failed", error);
+        }
+      }
     }
   }
 

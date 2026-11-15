@@ -44,7 +44,14 @@ function sanitizeLayout(input: unknown): SiteLayout | null {
   };
 }
 
-function clampLevel(value: unknown): number | undefined {
+/** 0–100 的连续值 */
+function clampPercent(value: unknown): number | undefined {
+  if (typeof value !== "number" || Number.isNaN(value)) return undefined;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+/** 底纹是三选一，不是滑杆 */
+function clampPattern(value: unknown): number | undefined {
   if (typeof value !== "number" || Number.isNaN(value)) return undefined;
   return Math.max(0, Math.min(2, Math.round(value)));
 }
@@ -52,16 +59,23 @@ function clampLevel(value: unknown): number | undefined {
 function sanitizeTweaks(input: unknown): SiteTweaks | null {
   if (!input || typeof input !== "object") return null;
   const source = input as Record<string, unknown>;
-  const out: SiteTweaks = {};
+  const out: SiteTweaks = { v: 2 };
 
-  const motion = clampLevel(source.motion);
-  const density = clampLevel(source.density);
-  const radius = clampLevel(source.radius);
-  if (motion !== undefined) out.motion = motion;
-  if (density !== undefined) out.density = density;
-  if (radius !== undefined) out.radius = radius;
+  const percentKeys = ["motion", "density", "scale", "radius", "width", "measure", "weight"] as const;
+  for (const key of percentKeys) {
+    const value = clampPercent(source[key]);
+    if (value !== undefined) out[key] = value;
+  }
+  const pattern = clampPattern(source.pattern);
+  if (pattern !== undefined) out.pattern = pattern;
   if (typeof source.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(source.accent)) {
     out.accent = source.accent;
+  }
+  if (typeof source.bg === "string" && /^#[0-9a-fA-F]{6}$/.test(source.bg)) {
+    out.bg = source.bg;
+  }
+  if (typeof source.ink === "string" && /^#[0-9a-fA-F]{6}$/.test(source.ink)) {
+    out.ink = source.ink;
   }
 
   return out;
@@ -117,7 +131,8 @@ export async function PATCH(
 
   const nextTheme: PageTheme = { ...theme };
   if (baseId) nextTheme.preset = baseId;
-  if (tweaks) nextTheme.tweaks = { ...(theme.tweaks ?? {}), ...tweaks };
+  // 编辑器每次发的是完整的一份，直接替换；合并会让「全部复原」失效
+  if (tweaks) nextTheme.tweaks = tweaks;
 
   const updated = await db.page.update({
     where: { id },

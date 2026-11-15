@@ -5,10 +5,11 @@ import { PenLine } from "lucide-react";
 import { db } from "@/lib/db";
 import { isValidEditToken } from "@/lib/tokens";
 import { buildSiteData } from "@/lib/site-data";
-import { getBase, toPrintBase } from "@/lib/templates/bases";
+import { getBase, isReadyBase, toPrintBase } from "@/lib/templates/bases";
 import type { RecipeMap } from "@/lib/templates/types";
-import type { SiteLayout, SiteTweaks } from "@/lib/site-config";
+import { normalizeTweaks, type SiteLayout, type SiteTweaks } from "@/lib/site-config";
 import { SiteView } from "@/components/render/site-view";
+import { LivePreview } from "@/components/render/live-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -51,11 +52,14 @@ export default async function PreviewPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ print?: string; bare?: string }>;
+  searchParams: Promise<{ print?: string; bare?: string; base?: string; static?: string }>;
 }) {
   const { token } = await params;
   const query = await searchParams;
   const print = query?.print === "1";
+  // 导出包是静态单页：轮盘那种一次只显示一格的壳在没 JS 的页面里等于丢内容，
+  // 所以静态导出与打印一样落回长页。
+  const flat = query?.static === "1" || print;
   const bare = query?.bare === "1" || print;
   const project = await loadProject(token);
   if (!project) notFound();
@@ -64,16 +68,33 @@ export default async function PreviewPage({
   const data = buildSiteData(resume?.blocks ?? []);
   const page = resume?.pages[0];
   const theme = (page?.theme ?? {}) as { tweaks?: SiteTweaks };
-  const base = print ? toPrintBase(getBase(page?.baseId)) : getBase(page?.baseId);
+  const baseId = query?.base && isReadyBase(query.base) ? query.base : page?.baseId;
+  const storedBase = print ? toPrintBase(getBase(baseId)) : getBase(baseId);
+  const base = flat && storedBase.shell ? { ...storedBase, shell: "stack" as const } : storedBase;
+  const recipeMap = (page?.recipeMap ?? null) as RecipeMap | null;
+  const layout = (page?.layout ?? null) as SiteLayout | null;
+  // 打印也要吃微调，否则导出的 PDF 和屏幕上不是同一张；只把动效压到 0
+  const stored = normalizeTweaks(theme.tweaks);
+  const tweaks = print ? { ...stored, motion: 0 } : stored;
+
+  // 编辑器里的那一栏走客户端渲染：改配置时由 postMessage 推过来就地重渲，不整页重载
+  if (bare && !print) {
+    return (
+      <LivePreview
+        token={token}
+        initial={{ base, data, recipeMap, layout, tweaks }}
+      />
+    );
+  }
 
   return (
     <>
       <SiteView
         base={base}
         data={data}
-        recipeMap={(page?.recipeMap ?? null) as RecipeMap | null}
-        layout={(page?.layout ?? null) as SiteLayout | null}
-        tweaks={print ? null : theme.tweaks}
+        recipeMap={recipeMap}
+        layout={layout}
+        tweaks={tweaks}
       />
 
       {!bare && (

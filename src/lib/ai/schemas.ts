@@ -30,10 +30,22 @@ export const gapsSchema = z.object({
         field: z.string().default("experience"),
         question: z.string(),
         why: z.string().default(""),
+        hint: z.string().default(""),
       }),
     )
-    .max(6),
+    .max(10),
 });
+
+/** 对话式追问：每次只决定「下一个问题是什么」 */
+export const askSchema = z.object({
+  done: z.boolean().default(false),
+  field: z.string().default("experience"),
+  question: z.string().default(""),
+  why: z.string().default(""),
+  hint: z.string().default(""),
+});
+
+export type AskResult = z.infer<typeof askSchema>;
 
 export type Gap = z.infer<typeof gapsSchema>["gaps"][number];
 

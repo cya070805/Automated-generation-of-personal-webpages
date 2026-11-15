@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { isValidEditToken } from "@/lib/tokens";
 import { Editor, type EditorBlock, type EditorShare } from "@/components/editor/editor";
 import type { RecipeMap } from "@/lib/templates/types";
-import type { SiteLayout, SiteTweaks } from "@/lib/site-config";
+import { normalizeTweaks, type SiteLayout, type SiteTweaks } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
@@ -34,14 +34,18 @@ interface BlockContent {
   custom?: string;
 }
 
-function blockText(type: string, content: BlockContent): string {
-  if (content.custom?.trim()) return content.custom;
+function blockFallbackText(type: string, content: BlockContent): string {
   if (type === "profile") return content.summary ?? "";
   const versions = content.versions ?? [];
   const picked = versions[content.chosen ?? 0] ?? versions[0];
   if (picked) return picked;
   if (content.items?.length) return content.items.join(" / ");
   return (content.details ?? []).join("\n");
+}
+
+function blockText(type: string, content: BlockContent): string {
+  if (content.custom?.trim()) return content.custom;
+  return blockFallbackText(type, content);
 }
 
 export default async function EditPage({
@@ -82,6 +86,7 @@ export default async function EditPage({
         org: content.org ?? "",
         period: content.period ?? "",
         text: blockText(block.type, content),
+        fallback: blockFallbackText(block.type, content),
       };
     });
 
@@ -107,7 +112,7 @@ export default async function EditPage({
         baseId: page?.baseId ?? "paper",
         recipeMap: (page?.recipeMap ?? {}) as RecipeMap,
         layout: (page?.layout ?? {}) as SiteLayout,
-        tweaks: theme.tweaks ?? {},
+        tweaks: normalizeTweaks(theme.tweaks),
       }}
     />
   );

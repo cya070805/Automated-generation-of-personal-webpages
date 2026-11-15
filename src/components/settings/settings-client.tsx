@@ -67,7 +67,7 @@ export function SettingsClient() {
   return (
     <div className="fade-up max-w-[760px]">
       <header>
-        <h1 className="text-[30px] leading-tight tracking-[-0.02em] text-ink">
+        <h1 className="text-[30px] leading-tight tracking-[-0.01em] text-ink">
           模型接入
         </h1>
         <p className="mt-3 max-w-[560px] text-[14.5px] leading-[1.75] text-muted">

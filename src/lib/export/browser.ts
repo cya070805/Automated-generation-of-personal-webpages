@@ -59,7 +59,7 @@ export async function renderStandaloneHtml(
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
   try {
-    await page.goto(`${origin}/preview/${token}?bare=1`, {
+    await page.goto(`${origin}/preview/${token}?bare=1&static=1`, {
       waitUntil: "load",
       timeout: 30000,
     });

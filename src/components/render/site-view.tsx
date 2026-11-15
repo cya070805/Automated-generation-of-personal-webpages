@@ -4,13 +4,24 @@ import { SECTION_LABELS } from "@/lib/site-data";
 import type { BaseTokens, Recipe, RecipeMap, SlotId } from "@/lib/templates/types";
 import { baseCssVars } from "@/lib/templates/bases";
 import { getRecipe, resolveRecipeMap } from "@/lib/templates/recipes";
-import { resolveBaseTokens, resolveOrder, type SiteLayout, type SiteTweaks } from "@/lib/site-config";
-import { Scanline } from "@/components/primitives/static";
+import {
+  motionAmountOf,
+  resolveBaseTokens,
+  resolveOrder,
+  toneOf,
+  type SiteLayout,
+  type SiteTweaks,
+} from "@/lib/site-config";
 import { Reveal } from "@/components/primitives/motion";
+import { ScrollBand } from "./band";
+import { SkillsFolder } from "./skills-folder";
+import { SkillsBubble } from "./skills-bubble";
+import { ContactBubble } from "./contact-bubble";
+import { ReelPage, type ReelPanel } from "./reel-page";
 import {
   AboutColumn,
-  AboutFacts,
   AboutLead,
+  AboutPoints,
   AboutPull,
   ContactBanner,
   ContactCard,
@@ -18,19 +29,39 @@ import {
   ExperienceCards,
   ExperienceRows,
   ExperienceTimeline,
+  BoxWall,
+  SkillsRing,
+  EntriesShowcase,
   HeroBento,
+  HeroFrame,
+  HeroOrbit,
+  HeroPoster,
   HeroColumn,
   HeroMasthead,
   HeroPlate,
   HeroPrompt,
   HeroSplit,
-  ProjectsCards,
   ProjectsFeature,
   ProjectsRows,
   ProjectsStrip,
   SkillsChips,
   SkillsInline,
   SkillsMeter,
+  AboutDropcap,
+  AboutNumbered,
+  ExperienceTable,
+  ExperienceSteps,
+  ProjectsIndex,
+  ProjectsStack,
+  SkillsMatrix,
+  SkillsRows,
+  ContactTicket,
+  HeroCenter,
+  AboutTwocol,
+  ExperienceCompact,
+  ProjectsMinimal,
+  SkillsGrid3,
+  ContactBigmail,
 } from "./slots";
 
 /**
@@ -59,15 +90,17 @@ const LAYOUTS: Record<string, Renderer> = {
   plate: HeroPlate,
   split: HeroSplit,
   bento: HeroBento,
+  poster: HeroPoster,
+  orbit: HeroOrbit,
+  frame: HeroFrame,
   column: AboutColumn,
   lead: AboutLead,
-  facts: AboutFacts,
+  points: AboutPoints,
   pull: AboutPull,
   rows: ExperienceRows,
   timeline: ExperienceTimeline,
   "exp-cards": ExperienceCards,
   "proj-rows": ProjectsRows,
-  "proj-cards": ProjectsCards,
   feature: ProjectsFeature,
   strip: ProjectsStrip,
   inline: SkillsInline,
@@ -76,11 +109,50 @@ const LAYOUTS: Record<string, Renderer> = {
   line: ContactLine,
   card: ContactCard,
   banner: ContactBanner,
+  showcase: EntriesShowcase,
+  boxes: BoxWall,
+  stagger: BoxWall,
+  band: ({ data, sections }) => <ScrollBand items={sections ?? data.sections} />,
+  ring: SkillsRing,
+  dropcap: AboutDropcap,
+  numbered: AboutNumbered,
+  etable: ExperienceTable,
+  steps: ExperienceSteps,
+  pindex: ProjectsIndex,
+  pstack: ProjectsStack,
+  smatrix: SkillsMatrix,
+  srows: SkillsRows,
+  ticket: ContactTicket,
+  center: HeroCenter,
+  twocol: AboutTwocol,
+  compact: ExperienceCompact,
+  pmin: ProjectsMinimal,
+  grid3: SkillsGrid3,
+  bigmail: ContactBigmail,
+  folder: ({ data }) => <SkillsFolder skills={data.skills} />,
+  tagbubble: ({ data }) => <SkillsBubble skills={data.skills} />,
+  bubble: ({ data }) => {
+    const job = data.sections.find((section) => section.kind === "experience");
+    const edu = data.sections.find((section) => section.kind === "education");
+    const now = job
+      ? [job.title, job.org].filter(Boolean).join(" · ")
+      : edu
+        ? [edu.org, "在读"].filter(Boolean).join(" · ")
+        : "";
+    return (
+      <ContactBubble
+        name={data.name}
+        email={data.email}
+        city={data.city}
+        now={now}
+      />
+    );
+  },
 };
 
 /** 同一个 layout 键在不同槽位可能是不同组件，这里按槽位兜一层 */
 const SLOT_ALIASES: Partial<Record<SlotId, Record<string, string>>> = {
-  projects: { rows: "proj-rows", cards: "proj-cards" },
+  projects: { rows: "proj-rows" },
   experience: { cards: "exp-cards" },
 };
 
@@ -112,53 +184,6 @@ function renderSlot({
 
 /* ————————————————— 页眉 ————————————————— */
 
-function PageHead({ base, data }: { base: BaseTokens; data: SiteData }) {
-  const frame = base.rhythm.frame;
-  const year = new Date().getFullYear();
-
-  if (frame === "chrome") {
-    return (
-      <div className="site-head">
-        <span className="flex items-center gap-3">
-          <span className="site-window-dots" aria-hidden>
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className="site-head-name">~/portfolio</span>
-        </span>
-        <span className="hidden sm:inline">bash — 80×24</span>
-      </div>
-    );
-  }
-
-  if (frame === "rule") {
-    return (
-      <div className="site-head">
-        <span className="site-head-name">
-          {data.name || "个人主页"}
-          <span style={{ opacity: 0.55 }}> — 个人主页</span>
-        </span>
-        <span>{[data.city, year].filter(Boolean).join(" · ")}</span>
-      </div>
-    );
-  }
-
-  if (frame === "grid") {
-    return (
-      <div className="site-head">
-        <span className="site-head-name">STUDIO</span>
-        <span className="flex items-center gap-2">
-          <span className="site-dot" aria-hidden />
-          开放交流
-        </span>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 /* ————————————————— 章节 ————————————————— */
 
 type Planned = {
@@ -181,6 +206,7 @@ export function SiteView({
   tweaks?: SiteTweaks | null;
 }) {
   const tokens = resolveBaseTokens(base, tweaks);
+  const motionAmount = motionAmountOf(tweaks);
   const map = resolveRecipeMap(tokens, recipeMap);
   const order = resolveOrder(layout);
 
@@ -218,7 +244,6 @@ export function SiteView({
     }
 
     if (slot === "experience") {
-      // 工作写在前面；教育单独排到最后，不让它把项目挤下去
       const worked = byKind.get("experience") ?? [];
       if (worked.length > 0) {
         planned.push({
@@ -227,6 +252,17 @@ export function SiteView({
           content: renderSlot({ slot, base: tokens, data, map, sections: worked }),
         });
       }
+      continue;
+    }
+
+    if (slot === "education") {
+      const educated = byKind.get("education") ?? [];
+      if (educated.length === 0) continue;
+      planned.push({
+        key: "education",
+        label: SECTION_LABELS.education,
+        content: renderSlot({ slot, base: tokens, data, map, sections: educated }),
+      });
       continue;
     }
 
@@ -261,107 +297,120 @@ export function SiteView({
     }
   }
 
-  // 教育放在技能之前；没有技能就放在最后
-  const educated = byKind.get("education") ?? [];
-  if (educated.length > 0 && order.includes("experience")) {
-    const at = planned.findIndex((item) => item.key === "skills");
-    planned.splice(at >= 0 ? at : planned.length, 0, {
-      key: "education",
-      label: SECTION_LABELS.education,
-      content: renderSlot({
-        slot: "experience",
-        base: tokens,
-        data,
-        map,
-        sections: educated,
-      }),
-    });
-  }
 
   const gap = "var(--b-section-gap)";
-  const hasRail = tokens.space.rail !== "0px";
+  const { dna } = tokens;
+  const shell = tokens.shell ?? "stack";
+
+  // 翻页壳：封面钉在上半部分，中间各章节做成下半部分的一叠卡片。
+  // 内容照样用配方渲染，只是换了「封面不动、卡片翻页」的外壳。
+  if (shell === "wheel") {
+    const panels: ReelPanel[] = [];
+    for (const section of planned) {
+      panels.push({ key: section.key, label: section.label, content: section.content });
+    }
+    if (contact) panels.push({ key: "contact", label: "联系", content: contact });
+
+    if (panels.length === 0) return null;
+
+    return (
+      <SiteShell tokens={tokens} shell={shell}>
+        <div className="site-inner relative z-[1]">
+          <ReelPage
+            cover={hero}
+            panels={panels}
+            name={data.name}
+            year={new Date().getFullYear()}
+            textColor={tokens.color.ink2}
+            activeColor={tokens.color.ink}
+            motion={tokens.motion}
+            footerNote={data.city}
+          />
+        </div>
+      </SiteShell>
+    );
+  }
+
+  return (
+    <SiteShell tokens={tokens} shell={shell}>
+      <div className="site-inner relative z-[1]">
+        {hero}
+
+        <div className="site-flow" style={{ gap }}>
+          {planned.map((section, index) => (
+            <Reveal key={section.key} motion={motionAmount}>
+              <section className="site-section">
+                <div className="site-rail">
+                  {dna.num !== "none" && (
+                    <span className="site-num">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  )}
+                  <span className="site-rail-label">{section.label}</span>
+                </div>
+                <div className="site-body">{section.content}</div>
+              </section>
+            </Reveal>
+          ))}
+
+          {contact && <div className="site-contact">{contact}</div>}
+
+          <footer className="site-foot">
+            <span>{data.name || "个人主页"}</span>
+            <span aria-hidden className="site-foot-dot" />
+            <span>{new Date().getFullYear()}</span>
+          </footer>
+        </div>
+      </div>
+    </SiteShell>
+  );
+}
+
+/**
+ * 页壳：底色、底纹、装饰件、data-* 开关。
+ * 长页和翻页壳共用同一层，好让换骨架时令牌一个都不变。
+ */
+function SiteShell({
+  tokens,
+  shell,
+  children,
+}: {
+  tokens: BaseTokens;
+  shell: "stack" | "wheel";
+  children: ReactNode;
+}) {
+  const { dna } = tokens;
 
   return (
     <main
       className="site relative min-h-dvh"
       style={baseCssVars(tokens) as CSSProperties}
       data-base={tokens.id}
+      data-shell={shell}
+      data-tone={toneOf(tokens.color.bg)}
       data-frame={tokens.rhythm.frame}
+      data-hero={dna.hero}
+      data-label={dna.label}
+      data-texture={dna.texture}
+      data-ornament={dna.ornament}
+      data-card={dna.card}
+      data-num={dna.num}
+      data-motion={tokens.motion}
     >
       <div className="site-atmos" aria-hidden>
-        {tokens.primitives.includes("scanline") && (
-          <div
-            className="absolute inset-x-0 top-0 h-[440px] opacity-70"
-            style={{
-              maskImage: "linear-gradient(to bottom, #000 0%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to bottom, #000 0%, transparent 100%)",
-            }}
-          >
-            <Scanline />
-          </div>
-        )}
+        {tokens.primitives.includes("scanline") && <span className="site-scan" />}
       </div>
 
-      <div className="site-inner relative z-[1]">
-        <PageHead base={tokens} data={data} />
-
-        {hero}
-
-        <div
-          style={{
-            display: "grid",
-            gap,
-            paddingTop: "clamp(16px, 2vw, 28px)",
-            paddingBottom: "clamp(48px, 6vw, 80px)",
-          }}
-        >
-          {planned.map((section, index) => (
-            <Reveal key={section.key}>
-              <section className={hasRail ? "site-section" : "site-section site-section--flat"}>
-                {hasRail ? (
-                  <div className="site-rail">
-                    {tokens.rhythm.frame !== "none" && (
-                      <span className="site-num">{String(index + 1).padStart(2, "0")}</span>
-                    )}
-                    <span className="site-rail-label">{section.label}</span>
-                  </div>
-                ) : (
-                  <p
-                    className="site-mono mb-5"
-                    style={{
-                      fontSize: "var(--b-size-meta)",
-                      letterSpacing: "0.24em",
-                      textTransform: "uppercase",
-                      color: "var(--b-muted)",
-                    }}
-                  >
-                    {section.label}
-                  </p>
-                )}
-                <div>{section.content}</div>
-              </section>
-            </Reveal>
-          ))}
-
-          {contact && (
-            <div style={{ paddingTop: "clamp(24px, 4vw, 56px)" }}>{contact}</div>
-          )}
-
-          <footer
-            className="site-mono flex flex-wrap items-center justify-between gap-3 border-t pt-6"
-            style={{
-              borderColor: "var(--b-line)",
-              fontSize: "var(--b-size-meta)",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--b-muted)",
-            }}
-          >
-            <span>{data.name || "个人主页"}</span>
-            <span>{new Date().getFullYear()}</span>
-          </footer>
+      {dna.ornament === "crop" && (
+        <div className="site-crop" aria-hidden>
+          <i />
+          <i />
+          <i />
+          <i />
         </div>
-      </div>
+      )}
+
+      {children}
     </main>
   );
 }
