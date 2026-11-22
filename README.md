@@ -32,6 +32,34 @@
 
 产品文档见 [`docs/产品能力地图与技术方案.pdf`](docs/产品能力地图与技术方案.pdf)，一期范围见 [`docs/一期说明.md`](docs/一期说明.md)。
 
+## 环境依赖与一键安装
+
+| 依赖 | 版本 | 说明 |
+| --- | --- | --- |
+| Node.js | ≥ 20（推荐 22 LTS） | Next 15 / Prisma 6 的下限是 18.18；本机用 24 也跑得通 |
+| npm | ≥ 10（随 Node 安装） | 用 `npm ci` 按 lock 文件精确安装 |
+| SQLite | 不用装 | Prisma 自带，数据就是一个文件 `prisma/dev.db` |
+| Chrome / Edge | 可选 | 只有「导出 PDF / 整站包」用到，直接复用本机浏览器 |
+| 资源 | 2G 内存 / 1G 磁盘 | 构建峰值约 1.5G，依赖约 400MB |
+
+一键装好：检查环境 → 装依赖 → 生成 `.env` → 建表 → 可选示例数据。
+
+```bash
+bash scripts/setup.sh          # Linux / macOS / Windows 的 Git Bash
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1   # Windows PowerShell
+```
+
+两个脚本逻辑一致，都支持这几个开关：
+
+| 参数 | 作用 |
+| --- | --- |
+| `--check` / `-Check` | 只检查 Node 版本和目录，不装不改 |
+| `SKIP_INSTALL=1` / `-SkipInstall` | 依赖装过了，跳过 `npm ci` |
+| `WITH_SEED=0` / `-NoSeed` | 不写示例数据 |
+
 ## 快速开始
 
 ```bash
@@ -58,10 +86,44 @@ API Key **不需要写进任何文件**：在设置页填入即可，只存在�
 > 本仓库不含任何真实 Key：`.env` 不进版本库，`.env.example` 里只有占位注释，源码里也没有硬编码的 Key。
 > 克隆下来自己 `cp .env.example .env` 再填即可；不想填也可以用网页里的设置页。
 
-## 部署
+## 部署运行
 
-放到阿里云 / 腾讯云的一台 Linux 上（Node 22 + SQLite + pm2），按步骤复制粘贴即可：
-见 [`docs/部署.md`](docs/部署.md)。同目录里还有常见问题表和域名/备案说明。
+**本机运行**用上面「快速开始」那四行就够；下面是放到服务器上的做法（阿里云 / 腾讯云，Ubuntu 22.04 实测）。
+
+```bash
+# 1. 环境（Ubuntu / Debian）
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs git
+
+# 2. 代码
+git clone https://github.com/cya070805/Automated-generation-of-personal-webpages.git /opt/ludao
+cd /opt/ludao
+
+# 3. 环境变量：数据放独立目录，重新部署不丢
+mkdir -p /opt/ludao-data
+printf 'DATABASE_URL="file:/opt/ludao-data/app.db"\n' > .env
+
+# 4. 依赖 + 建表 + 构建
+npm ci && npx prisma migrate deploy && npm run build
+
+# 5. 常驻
+npm i -g pm2 && pm2 start npm --name ludao -- start && pm2 save && pm2 startup
+```
+
+浏览器打开 `http://服务器公网IP:3000`；记得在云控制台的安全组 / 防火墙放行 3000 端口。
+
+| 环境变量 | 必填 | 说明 |
+| --- | --- | --- |
+| `DATABASE_URL` | 是 | SQLite 文件路径；本机默认 `file:./dev.db` |
+| `LLM_API_KEY` | 否 | 预置 Key。公网部署别设：站点没有登录，谁打开都在花你的额度 |
+| `ALLOW_PRIVATE_LLM` | 否 | 要把模型请求发往内网（自托管 Ollama / 公司网关）时设为 `1` |
+
+改了代码之后更新：
+
+```bash
+cd /opt/ludao && git pull && npm ci && npx prisma migrate deploy && npm run build && pm2 restart ludao
+```
+
+逐步说明、域名与备案、常见问题表在 [`docs/部署.md`](docs/部署.md)。
 
 ## 目录结构
 
@@ -204,8 +266,41 @@ AI 管线：`解析（文件 → 文本）→ 抽取（JSON Schema 约束，失�
 ## 技术选型
 
 Next.js 15（App Router）+ TypeScript · Tailwind CSS（CSS 变量做设计令牌）· Prisma + SQLite（可换 Postgres）·
-Zustand · OpenAI 兼容协议 + 同源转发 · unpdf / mammoth 解析旧简历 · Playwright 出 PDF（未开始）·
-Docker Compose 部署（未开始）。
+Zustand · OpenAI 兼容协议 + 同源转发 · unpdf / mammoth 解析旧简历 · Playwright 出 PDF ·
+Docker Compose 打包部署（导出包里带 Dockerfile 与 compose）。
+
+## 开源组件
+
+除框架本身，直接依赖的都在这里。全部是 MIT / Apache-2.0 / BSD / ISC 这类宽松许可，没有需要商业授权的组件。
+
+| 组件 | 版本 | 许可 | 用在哪 |
+| --- | --- | --- | --- |
+| Next.js | 15.5 | MIT | 页面与 API 路由；部署只起一个 Node 服务 |
+| React / React DOM | 19.1 | MIT | 界面与编辑器交互 |
+| Prisma / @prisma/client | 6.16 | Apache-2.0 | ORM；SQLite 十张表与迁移 |
+| Tailwind CSS | 4.x | MIT | 样式；CSS 变量承载基底令牌 |
+| lucide-react | 0.468 | ISC | 图标 |
+| zustand | 5.x | MIT | 浏览器端状态（模型设置、编辑器草稿） |
+| zod | 3.24 | MIT | 接口参数校验 |
+| playwright-core | 1.65 | Apache-2.0 | 导出 PDF / 整站包；复用系统 Chrome，不额外下载浏览器 |
+| unpdf | 2.1 | MIT | 解析上传的 PDF 简历 |
+| mammoth | 1.13 | BSD-2-Clause | 解析上传的 DOCX 简历 |
+| clsx + tailwind-merge | 2.1 / 2.6 | MIT | className 合并 |
+| class-variance-authority | 0.7 | Apache-2.0 | 按钮等组件的变体 |
+| TypeScript / ESLint / tsx | 5.x / 9.x / 4.x | Apache-2.0 / MIT / MIT | 开发期类型检查、规范检查、跑种子脚本 |
+
+运行时另依赖：Node.js（MIT）、SQLite（公有领域）；导出 PDF 时调用本机已装的 Chrome / Edge。
+
+## 码道在项目开发中的应用
+
+这个项目从 0 到可演示，主要靠 AI 编码助手推进，我负责判断和验收。几个环节实际用下来是这样：
+
+- **拆任务**：先把「AI 生成个人主页」拆成采集、抽取、呈现、发布四段，定好数据模型和接口，再让码道一层一层写。拆得清楚，它生成的代码才落在该在的位置。
+- **批量写重复结构**：十套基底、57 条配方、编辑器五栏的表单，形态高度重复。先手写一套当样本，其余按样子补齐，再逐条核对令牌和间距。
+- **排错**：报错栈、数据库里的实际数据、浏览器网络面板三样一起丢给它，比自己猜快。技能栏那个 bug 就是它先指出「库里有两个技能块」。
+- **写文档和脚本**：部署文档、README、一键安装脚本、PDF 生成脚本都是它出初稿，我对着真实服务器跑一遍再改。
+
+一点体会：AI 写的代码「看起来对」的概率不低，坑往往出在**两处各自正确的逻辑拼起来**——抽取端写了一个技能块，渲染端只取第一个，单看哪边都没错。所以验收不看它说做了什么，只看三样：`tsc` / `eslint` 干净、`next build` 能过、真机点一遍符合预期；这三关不过就一直改到过。
 
 ## 不做
 
